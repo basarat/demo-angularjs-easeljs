@@ -1,7 +1,6 @@
 /// <reference path="./angularModules.ts" />
 
 //grunt-start
-/// <reference path="directives/demo.html.ts" />
 /// <reference path="directives/testme.html.ts" />
 /// <reference path="angularModules.ts" />
 /// <reference path="controllers/MainController.ts" />

@@ -1,1 +1,1 @@
-module testme { export var html =  '<div>Hey wassup yo!</div>' } 
+module testme { export var html =  '<div class="well">        <div class="progress progress-striped progress-active">            <div class="bar" style="width: {{progress}}%"></div>        </div></div>' } 

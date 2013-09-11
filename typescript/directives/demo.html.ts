@@ -1,1 +1,0 @@
-module demo { export var html =  '<div class="well">     <div class="progress progress-striped progress-active">        <div class="bar" style="width: {{progress}}%"></div>    </div></div>' } 
