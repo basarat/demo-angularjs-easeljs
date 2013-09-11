@@ -1,6 +1,7 @@
+/// <reference path="../reference.ts"/>
 class LogService{
     log(msg:any){
         console.log(msg);
     }
 }
-services.service('logService',LogService);
+myApp.services.service('logService',LogService);
