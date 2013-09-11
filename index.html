@@ -5,20 +5,22 @@
 
     <link rel="stylesheet" href="vendor/bootstrap/css/bootstrap.css">
 
-    <!--Scripts-->    
+    <!--Scripts-->
     <script src="vendor/jquery-1.9.1.min.js"></script>
     <script src="vendor/angular.js"></script>
     <script src="vendor/bootstrap/js/bootstrap.min.js"></script>
 
     <!--<script src="vendor/require.js" data-main="app/loader.js"></script>-->
     <script src="app/out.js"></script>
-    
+
 </head>
 <body ng-controller="MainController">
-{{vm.message}}
-    <div ng-controller ="TestController">
-        {{vm.message}}
+
+    <div class="well">
+        <div class="progress progress-striped progress-active">
+            <div class="bar" style="width: 50%"></div>
+        </div>
     </div>
-    <testme></testme>
+
 </body>
 </html>
