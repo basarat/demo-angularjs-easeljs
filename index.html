@@ -16,9 +16,10 @@
 </head>
 <body ng-controller="MainController">
 
+    <div class="btn" ng-click="vm.increaseProgress()"> click me </div>
     <div class="well">
         <div class="progress progress-striped progress-active">
-            <div class="bar" style="width: 50%"></div>
+            <div class="bar" style="width: {{vm.progress}}%"></div>
         </div>
     </div>
     
