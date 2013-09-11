@@ -2,18 +2,19 @@
   <library name="Generated files" type="javaScript">
     <properties>
       <sourceFilesUrls>
-        <item url="file://$PROJECT_DIR$/app/main.js" />
         <item url="file://$PROJECT_DIR$/app/directives/testme.js" />
-        <item url="file://$PROJECT_DIR$/app/services/services.js" />
         <item url="file://$PROJECT_DIR$/node_modules/grunt-ts/tasks/ts.js" />
+        <item url="file://$PROJECT_DIR$/app/services/services.js" />
+        <item url="file://$PROJECT_DIR$/node_modules/grunt-ts/tasks/scratch.js" />
+        <item url="file://$PROJECT_DIR$/app/controllers/MainController.js" />
         <item url="file://$PROJECT_DIR$/app/services/LogService.js" />
+        <item url="file://$PROJECT_DIR$/app/main.js" />
+        <item url="file://$PROJECT_DIR$/app/controllers/TestController.js" />
         <item url="file://$PROJECT_DIR$/app/directives/testme.html.js" />
         <item url="file://$PROJECT_DIR$/app/controllers/controllers.js" />
         <item url="file://$PROJECT_DIR$/app/reference.js" />
-        <item url="file://$PROJECT_DIR$/app/controllers/MainController.js" />
+        <item url="file://$PROJECT_DIR$/typescript/main.js" />
         <item url="file://$PROJECT_DIR$/app/directives/directives.js" />
-        <item url="file://$PROJECT_DIR$/node_modules/grunt-ts/tasks/scratch.js" />
-        <item url="file://$PROJECT_DIR$/app/controllers/TestController.js" />
       </sourceFilesUrls>
     </properties>
     <CLASSES>
@@ -23,18 +24,19 @@
       <root url="file://$PROJECT_DIR$/app/directives/progressbar.js" />
       <root url="file://$PROJECT_DIR$/app/directives/progressbar.html.js" />
       <root url="file://$PROJECT_DIR$/app/directives/progressbar.js" />
-      <root url="file://$PROJECT_DIR$/app/main.js" />
-      <root url="file://$PROJECT_DIR$/app/services/services.js" />
-      <root url="file://$PROJECT_DIR$/node_modules/grunt-ts/tasks/ts.js" />
-      <root url="file://$PROJECT_DIR$/app/services/LogService.js" />
-      <root url="file://$PROJECT_DIR$/node_modules/grunt-ts/tasks/scratch.js" />
-      <root url="file://$PROJECT_DIR$/app/directives/directives.js" />
       <root url="file://$PROJECT_DIR$/app/directives/testme.js" />
-      <root url="file://$PROJECT_DIR$/app/directives/testme.html.js" />
-      <root url="file://$PROJECT_DIR$/app/controllers/controllers.js" />
+      <root url="file://$PROJECT_DIR$/app/services/services.js" />
+      <root url="file://$PROJECT_DIR$/app/services/LogService.js" />
+      <root url="file://$PROJECT_DIR$/app/main.js" />
       <root url="file://$PROJECT_DIR$/app/reference.js" />
+      <root url="file://$PROJECT_DIR$/node_modules/grunt-ts/tasks/ts.js" />
+      <root url="file://$PROJECT_DIR$/node_modules/grunt-ts/tasks/scratch.js" />
       <root url="file://$PROJECT_DIR$/app/controllers/MainController.js" />
       <root url="file://$PROJECT_DIR$/app/controllers/TestController.js" />
+      <root url="file://$PROJECT_DIR$/app/directives/testme.html.js" />
+      <root url="file://$PROJECT_DIR$/app/controllers/controllers.js" />
+      <root url="file://$PROJECT_DIR$/typescript/main.js" />
+      <root url="file://$PROJECT_DIR$/app/directives/directives.js" />
     </CLASSES>
     <SOURCES />
   </library>
