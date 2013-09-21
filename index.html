@@ -10,6 +10,7 @@
     <script src="vendor/angular.js"></script>
     <script src="vendor/bootstrap/js/bootstrap.min.js"></script>
     <script src="vendor/easeljs.js"></script>
+    <script src="vendor/preloadjs.js"></script>
     <script src="vendor/underscore.js"></script>
 
 
@@ -18,12 +19,18 @@
 
 </head>
 <body ng-controller="MainController">
-    <div ratio="vm.image.height/vm.image.width" 
+    <br />
+    <div class="row row-fluid">
+      <button type="button" class="btn btn-large offset4 span2" ng-click="vm.currentImage=vm.image1">First</button>
+      <button type="button" class="btn btn-large span2" ng-click="vm.currentImage=vm.image2">Second</button>
+    </div>
+    <br />
+    <div ratio="vm.currentImage.height/vm.currentImage.width" 
         style="width:100%" 
         calculatedwidth="parentwidth"
         calculatedheight="parentheight"
         >
-        <annotateimage image="vm.image" width="parentwidth" height="parentheight"></annotateimage>
+        <annotateimage image="vm.currentImage" width="parentwidth" height="parentheight"></annotateimage>
     </div>
 </body>
 </html>

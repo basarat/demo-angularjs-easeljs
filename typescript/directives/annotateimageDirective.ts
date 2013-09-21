@@ -4,6 +4,7 @@ interface UIAnnotateImage {
     width: number;
     height: number;
     uri: string;
+    pointAnnotation: createjs.Point[][];
 }
 
 interface Point {
@@ -15,8 +16,6 @@ interface AnnotateImageDirectiveScope extends ng.IScope {
     image: UIAnnotateImage;
     width: number;
     height: number;
-
-    pointAnnotation: createjs.Point[][];
 }
 
 myApp.directives.directive('annotateimage', function (): ng.IDirective {
@@ -36,7 +35,7 @@ myApp.directives.directive('annotateimage', function (): ng.IDirective {
             // Create the stage 
             var stage = new createjs.Stage(canvas);
             createjs.Touch.enable(stage);
-
+            
             // Defaults
             var color = 'black';
             var stroke = 5;
@@ -52,16 +51,14 @@ myApp.directives.directive('annotateimage', function (): ng.IDirective {
             stage.autoClear = true;
             stage.enableDOMEvents(true);
 
-            // Point annotation 
-            scope.pointAnnotation = [];
-
             function redraw() {
                 if (!scope.image) return;
 
-
                 // Draw points 
-                if (scope.pointAnnotation.length) {
-                    _.forEach(scope.pointAnnotation, (pointAnnotation) => {
+                if (scope.image.pointAnnotation.length) {
+                    _.forEach(scope.image.pointAnnotation, (pointAnnotation) => {
+                        if (pointAnnotation.length == 0) return;
+
                         var oldPt = pointAnnotation[0];
                         var oldMidPt = oldPt.clone();
 
@@ -115,12 +112,22 @@ myApp.directives.directive('annotateimage', function (): ng.IDirective {
                 if (!scope.image) return;
 
                 // TODO: actually remove everything.
-                // And resetup drawing canvas etc. 
+                if (image) {
+                    stage.removeChildAt(0);
+                }
 
-                image = new createjs.Bitmap(scope.image.uri);
-                stage.addChildAt(image, 0);
+                // Load the image async
+                var queue = new createjs.LoadQueue(false); // Using false to disble XHR only for file system based demo
+                queue.addEventListener("complete", onComplete);
+                queue.loadManifest([
+                    { id: "myImage", src: scope.image.uri }
+                ]);
 
-                resize();
+                function onComplete() {
+                    image = new createjs.Bitmap(queue.getResult("myImage"));
+                    stage.addChildAt(image, 0);
+                    resize();
+                }
             }, true);
 
             // Watch the size 
@@ -136,18 +143,16 @@ myApp.directives.directive('annotateimage', function (): ng.IDirective {
             index = 0;
 
 
+            // Setup event listener
             stage.addEventListener("stagemousedown", handleMouseDown);
-            stage.addEventListener("stagemouseup", handleMouseUp);
-
-
-            // Finally redraw 
-            redraw();
 
             var currentPointAnnotation: createjs.Point[];
             function handleMouseDown(event) {
                 oldPt = new createjs.Point(stage.mouseX / stage.scaleX, stage.mouseY / stage.scaleY);
                 oldMidPt = oldPt;
+
                 stage.addEventListener("stagemousemove", handleMouseMove);
+                stage.addEventListener("stagemouseup", handleMouseUp);
 
                 currentPointAnnotation = [oldPt.clone()];
             }
@@ -171,7 +176,9 @@ myApp.directives.directive('annotateimage', function (): ng.IDirective {
 
             function handleMouseUp(event) {
                 stage.removeEventListener("stagemousemove", handleMouseMove);
-                scope.pointAnnotation.push(currentPointAnnotation);
+                stage.removeEventListener("stagemouseup", handleMouseUp);
+
+                scope.image.pointAnnotation.push(currentPointAnnotation);
             }
 
         }
