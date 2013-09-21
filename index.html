@@ -9,16 +9,13 @@
     <script src="vendor/jquery-1.9.1.min.js"></script>
     <script src="vendor/angular.js"></script>
     <script src="vendor/bootstrap/js/bootstrap.min.js"></script>
+    <script src="vendor/easeljs.js"></script>
 
     <!--<script src="vendor/require.js" data-main="app/loader.js"></script>-->
     <script src="app/out.js"></script>
 
 </head>
 <body ng-controller="MainController">
-     {{vm.progress}}
-    <div class="btn" ng-click="vm.inccc()">click me pleas </div>
-    <progressbar progress="vm.progress"></progressbar>
-    <div class="progressbar" progress="vm.progress"></div>
-
+    <annotateimage></annotateimage>
 </body>
 </html>

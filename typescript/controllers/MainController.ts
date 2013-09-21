@@ -1,13 +1,15 @@
 module Controllers{
     export class MainController{
-        progress = 30; 
-        constructor($scope,logService:LogService) {
+
+        image: UIAnnotateImage = {
+            uri: '/app/images/550x190.png',
+            width: 550,
+            height: 190
+        }
+
+        constructor($scope) {
             $scope.vm = this; 
-            logService.log("asdf"); 
         } 
 
-        inccc() {
-            this.progress = this.progress + 10; 
-        }
     }
 }

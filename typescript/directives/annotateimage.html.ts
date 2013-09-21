@@ -1,0 +1,1 @@
+module annotateimage { export var html =  '<canvas> </canvas>' } 
