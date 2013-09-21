@@ -5,6 +5,7 @@
 /// <reference path="controllers/MainController.ts" />
 /// <reference path="controllers/TestController.ts" />
 /// <reference path="directives/annotateimageDirective.ts" />
+/// <reference path="directives/ratioDirective.ts" />
 /// <reference path="services/LogService.ts" />
 /// <reference path="vendor.d.ts" />
 //grunt-end

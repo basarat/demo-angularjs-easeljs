@@ -1,1 +1,1 @@
-module annotateimage { export var html =  '<canvas> </canvas>' } 
+module annotateimage { export var html =  '<canvas    style="width:100%"    ratio="image.height/image.width"     calculatedheight="parentheight"     calculatedwidth="parentwidth"> </canvas>' } 
