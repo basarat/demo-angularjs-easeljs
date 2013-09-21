@@ -36,22 +36,25 @@ myApp.directives.directive('annotateimage', function (): ng.IDirective {
             // Create the stage 
             var stage = new createjs.Stage(canvas);
             createjs.Touch.enable(stage);
+
             // Defaults
             var color = 'black';
             var stroke = 5;
 
             // Create a drawing canvas for our rendering
             var drawingCanvas = new createjs.Shape();
+            drawingCanvas.graphics.setStrokeStyle(stroke, 'round', 'round');
             stage.addChild(drawingCanvas);
+
+            // Stage behaviours 
+            stage.autoClear = true;
+            stage.enableDOMEvents(true);
 
             // Point annotation 
             scope.pointAnnotation = [];
 
             function redraw() {
                 if (!scope.image) return;
-
-                console.log('clearning stage');
-
 
                 // Draw points 
                 if (scope.pointAnnotation.length) {
@@ -61,18 +64,14 @@ myApp.directives.directive('annotateimage', function (): ng.IDirective {
                     _.forEach(scope.pointAnnotation, (newPoint) => {
                         var midPt = new createjs.Point((oldPt.x + newPoint.x) / 2, (oldPt.y + newPoint.y) / 2);
 
-                        drawingCanvas.graphics.setStrokeStyle(stroke, 'round', 'round');
                         drawingCanvas.graphics.beginStroke(color).moveTo(midPt.x, midPt.y).curveTo(oldPt.x, oldPt.y, oldMidPt.x, oldMidPt.y);
-                        stage.update();
-                        drawingCanvas.graphics.clear();
-
+                        
                         oldPt = newPoint.clone();
                         oldMidPt = midPt.clone();
                     });
                 }
 
                 // Render it out
-                console.log('updating stage');
                 stage.update();
             }
 
@@ -101,11 +100,6 @@ myApp.directives.directive('annotateimage', function (): ng.IDirective {
             index = 0;
 
 
-
-            stage.autoClear = false;
-            stage.enableDOMEvents(true);
-
-
             stage.addEventListener("stagemousedown", handleMouseDown);
             stage.addEventListener("stagemouseup", handleMouseUp);
 
@@ -118,19 +112,16 @@ myApp.directives.directive('annotateimage', function (): ng.IDirective {
                 oldMidPt = oldPt;
                 stage.addEventListener("stagemousemove", handleMouseMove);
 
-                scope.pointAnnotation = [oldPt.clone()];               
+                scope.pointAnnotation = [oldPt.clone()];
             }
 
             function handleMouseMove(event) {
 
                 var newPoint = new createjs.Point(stage.mouseX, stage.mouseY);
+                var midPt = new createjs.Point((oldPt.x + newPoint.x) / 2, (oldPt.y + newPoint.y) / 2);
 
-                var midPt = new createjs.Point( (oldPt.x + newPoint.x) / 2 , (oldPt.y + newPoint.y) / 2);
-
-                drawingCanvas.graphics.setStrokeStyle(stroke, 'round', 'round');
                 drawingCanvas.graphics.beginStroke(color).moveTo(midPt.x, midPt.y).curveTo(oldPt.x, oldPt.y, oldMidPt.x, oldMidPt.y);
                 stage.update();
-                drawingCanvas.graphics.clear();
 
                 oldPt = newPoint.clone();
 
