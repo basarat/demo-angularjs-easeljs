@@ -26,7 +26,8 @@ myApp.directives.directive('ratio',function ($parse: ng.IParseService) {
             }, 400);
 
             scope.$watch(attrs.ratio, (val) => {
-                preserveRatio();
+                if(val)
+                    preserveRatio();
             });
 
             $(window).resize(preserveRatio);
