@@ -18,6 +18,12 @@
 
 </head>
 <body ng-controller="MainController">
-    <annotateimage></annotateimage>
+    <div ratio="vm.image.height/vm.image.width" 
+        style="width:100%" 
+        calculatedwidth="parentwidth"
+        calculatedheight="parentheight"
+        >
+        <annotateimage image="vm.image" width="parentwidth" height="parentheight"></annotateimage>
+    </div>
 </body>
 </html>
