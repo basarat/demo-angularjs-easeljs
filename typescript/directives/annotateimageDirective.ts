@@ -46,6 +46,9 @@ myApp.directives.directive('annotateimage', function (): ng.IDirective {
             drawingCanvas.graphics.setStrokeStyle(stroke, 'round', 'round');
             stage.addChild(drawingCanvas);
 
+            // Create a base image canvas
+            var image: createjs.Bitmap;
+            
             // Stage behaviours 
             stage.autoClear = true;
             stage.enableDOMEvents(true);
@@ -56,6 +59,7 @@ myApp.directives.directive('annotateimage', function (): ng.IDirective {
             function redraw() {
                 if (!scope.image) return;
 
+                
                 // Draw points 
                 if (scope.pointAnnotation.length) {
                     var oldPt = scope.pointAnnotation[0];
@@ -75,21 +79,44 @@ myApp.directives.directive('annotateimage', function (): ng.IDirective {
                 stage.update();
             }
 
-            // Watch the image
-            scope.$watch('image', () => {
-                redraw();
-            }, true);
-
             function resize() {
+                // Depends upon width/height/image to all be set on scope 
+                if (!scope.width || !scope.height || !scope.image) return; 
+
+                // Assumption. The width / height of container matches the proportion for image. 
+                // This is done by parent already 
+
                 // Set the canvas width / height 
                 stage.canvas.width = scope.width;
                 stage.canvas.height = scope.height;
 
+                // Set the zoom so that image takes up entire canvas
+                // This allows us to zoom the stage and everything stays in proportion when we do that
+                stage.scaleX = scope.width / scope.image.width;
+                stage.scaleY = scope.height / scope.image.height;
+
+               
                 // At the end of the resize we need to do a redraw
                 redraw();
             }
-            scope.$watch('width', resize);
-            scope.$watch('height', resize);
+
+            // Watch the image
+            scope.$watch('image', () => {
+
+                if (!scope.image) return;  
+
+                // TODO: actually remove everything.
+                // And resetup drawing canvas etc. 
+
+                image = new createjs.Bitmap(scope.image.uri);
+                stage.addChildAt(image, 0);
+
+                resize();
+            }, true);
+
+            // Watch the size 
+            scope.$watch('width', () => { resize() });
+            scope.$watch('height', () => { resize() });
 
             /* From sample */
             var oldPt;
@@ -108,7 +135,7 @@ myApp.directives.directive('annotateimage', function (): ng.IDirective {
             redraw();
 
             function handleMouseDown(event) {
-                oldPt = new createjs.Point(stage.mouseX, stage.mouseY);
+                oldPt = new createjs.Point(stage.mouseX/stage.scaleX, stage.mouseY/stage.scaleY);
                 oldMidPt = oldPt;
                 stage.addEventListener("stagemousemove", handleMouseMove);
 
@@ -117,7 +144,7 @@ myApp.directives.directive('annotateimage', function (): ng.IDirective {
 
             function handleMouseMove(event) {
 
-                var newPoint = new createjs.Point(stage.mouseX, stage.mouseY);
+                var newPoint = new createjs.Point(stage.mouseX/stage.scaleX, stage.mouseY/stage.scaleY);
                 var midPt = new createjs.Point((oldPt.x + newPoint.x) / 2, (oldPt.y + newPoint.y) / 2);
 
                 drawingCanvas.graphics.beginStroke(color).moveTo(midPt.x, midPt.y).curveTo(oldPt.x, oldPt.y, oldMidPt.x, oldMidPt.y);
