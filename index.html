@@ -15,9 +15,10 @@
 
 </head>
 <body ng-controller="MainController">
+     {{vm.progress}}
+    <div class="btn" ng-click="vm.inccc()">click me pleas </div>
+    <progressbar progress="vm.progress"></progressbar>
+    <div class="progressbar" progress="vm.progress"></div>
 
-    <div class="btn" ng-click="vm.increaseProgress()"> click me </div>
-    <testme progress="vm.progress"></testme>
-    
 </body>
 </html>

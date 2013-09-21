@@ -1,14 +1,13 @@
 module Controllers{
     export class MainController{
-        message = "asdf";
-        progress = 0; 
-        constructor($scope,logService:LogService){
-            $scope.vm = this;
-            logService.log('Some log');
-        }
+        progress = 30; 
+        constructor($scope,logService:LogService) {
+            $scope.vm = this; 
+            logService.log("asdf"); 
+        } 
 
-        increaseProgress() {
-            this.progress += 10; 
+        inccc() {
+            this.progress = this.progress + 10; 
         }
     }
 }

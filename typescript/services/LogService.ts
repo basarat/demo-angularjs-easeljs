@@ -1,6 +1,6 @@
 /// <reference path="../reference.ts"/>
 class LogService{
-    log(msg:any){
+    log(msg:string){
         console.log(msg);
     }
 }
