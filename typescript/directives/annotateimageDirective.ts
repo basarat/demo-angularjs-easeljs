@@ -106,6 +106,30 @@ myApp.directives.directive('annotateimage', function (): ng.IDirective {
                 redraw();
             }
 
+            // Modified : http://stackoverflow.com/a/2541680/390330
+            function getAverageRGB(canvas: HTMLCanvasElement) {
+                var rgb = { r: 0, g: 0, b: 0 };
+                var data = canvas.getContext('2d').getImageData(0, 0, scope.image.width, scope.image.height);
+                var length = data.data.length;
+
+                var blockSize = 5; // only visit every 5 pixels; 
+                var i = -4,count=0;
+
+                while ((i += blockSize * 4) < length) {
+                    ++count;
+                    rgb.r += data.data[i];
+                    rgb.g += data.data[i + 1];
+                    rgb.b += data.data[i + 2];
+                }
+
+                // ~~ used to floor values
+                rgb.r = ~~(rgb.r / count);
+                rgb.g = ~~(rgb.g / count);
+                rgb.b = ~~(rgb.b / count);
+
+                return rgb;
+            }
+
             // Watch the image
             scope.$watch('image', () => {
 
@@ -124,8 +148,15 @@ myApp.directives.directive('annotateimage', function (): ng.IDirective {
                 ]);
 
                 function onComplete() {
+                    // Get , add , draw the image
                     image = new createjs.Bitmap(queue.getResult("myImage"));
                     stage.addChildAt(image, 0);
+                    stage.update();
+
+                    // Get the image data : 
+                    //var avgRGB = getAverageRGB(stage.canvas);
+                    //console.log(avgRGB);
+
                     resize();
                 }
             }, true);
