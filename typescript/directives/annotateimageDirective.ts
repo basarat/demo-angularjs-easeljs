@@ -18,16 +18,16 @@ interface AnnotateImageDirectiveScope extends ng.IScope {
     height: number;
 }
 
-myApp.directives.directive('annotateimage', function (): ng.IDirective {
+myApp.directives.directive('annotateimage', ['$isolator',function ($isolator:$isolatorService): ng.IDirective {
     return {
-        restrict: 'E',
-        template: annotateimage.html,
-        scope: {
-            image: '=',
-            width: '=',
-            height: '=',
-        },
-        link: (scope: AnnotateImageDirectiveScope, element: JQuery, attrs) => {
+        restrict: 'E',        
+        link: (scope: AnnotateImageDirectiveScope, element, attrs) => {
+            scope = $isolator.setupDirective(
+                {
+                    image: '=',
+                    width: '=',
+                    height: '=',
+                }, scope, element, attrs, annotateimage.html);
 
             // Find the canvas
             var canvas: HTMLCanvasElement = <HTMLCanvasElement>element.find('canvas')[0];
@@ -35,7 +35,7 @@ myApp.directives.directive('annotateimage', function (): ng.IDirective {
             // Create the stage 
             var stage = new createjs.Stage(canvas);
             createjs.Touch.enable(stage);
-            
+
             // Defaults
             var color = 'black';
             var stroke = 5;
@@ -113,7 +113,7 @@ myApp.directives.directive('annotateimage', function (): ng.IDirective {
                 var length = data.data.length;
 
                 var blockSize = 5; // only visit every 5 pixels; 
-                var i = -4,count=0;
+                var i = -4, count = 0;
 
                 while ((i += blockSize * 4) < length) {
                     ++count;
@@ -214,4 +214,4 @@ myApp.directives.directive('annotateimage', function (): ng.IDirective {
 
         }
     }
-})
+}]);
