@@ -37,11 +37,12 @@ myApp.directives.directive('annotateimage', ['$isolator',function ($isolator:$is
             createjs.Touch.enable(stage);
 
             // Defaults
-            var color = 'black';
+            var color = 'white';
             var stroke = 5;
 
             // Create a drawing canvas for our rendering
             var drawingCanvas = new createjs.Shape();
+            drawingCanvas.shadow = new createjs.Shadow("#000000", 5, 5, 10);
             stage.addChild(drawingCanvas);
 
             // Create a base image canvas
@@ -62,14 +63,18 @@ myApp.directives.directive('annotateimage', ['$isolator',function ($isolator:$is
                         var oldPt = pointAnnotation[0];
                         var oldMidPt = oldPt.clone();
 
+                        drawingCanvas.graphics.beginStroke(color); 
+
                         _.forEach(pointAnnotation, (newPoint) => {
                             var midPt = new createjs.Point((oldPt.x + newPoint.x) / 2, (oldPt.y + newPoint.y) / 2);
 
-                            drawingCanvas.graphics.beginStroke(color).moveTo(midPt.x, midPt.y).curveTo(oldPt.x, oldPt.y, oldMidPt.x, oldMidPt.y);
+                            drawingCanvas.graphics.moveTo(midPt.x, midPt.y).curveTo(oldPt.x, oldPt.y, oldMidPt.x, oldMidPt.y);
 
                             oldPt = newPoint.clone();
                             oldMidPt = midPt.clone();
                         });
+
+                        drawingCanvas.graphics.endStroke();
                     });
                 }
 
@@ -106,30 +111,6 @@ myApp.directives.directive('annotateimage', ['$isolator',function ($isolator:$is
                 redraw();
             }
 
-            // Modified : http://stackoverflow.com/a/2541680/390330
-            function getAverageRGB(canvas: HTMLCanvasElement) {
-                var rgb = { r: 0, g: 0, b: 0 };
-                var data = canvas.getContext('2d').getImageData(0, 0, scope.image.width, scope.image.height);
-                var length = data.data.length;
-
-                var blockSize = 5; // only visit every 5 pixels; 
-                var i = -4, count = 0;
-
-                while ((i += blockSize * 4) < length) {
-                    ++count;
-                    rgb.r += data.data[i];
-                    rgb.g += data.data[i + 1];
-                    rgb.b += data.data[i + 2];
-                }
-
-                // ~~ used to floor values
-                rgb.r = ~~(rgb.r / count);
-                rgb.g = ~~(rgb.g / count);
-                rgb.b = ~~(rgb.b / count);
-
-                return rgb;
-            }
-
             // Watch the image
             scope.$watch('image', () => {
 
@@ -153,10 +134,6 @@ myApp.directives.directive('annotateimage', ['$isolator',function ($isolator:$is
                     stage.addChildAt(image, 0);
                     stage.update();
 
-                    // Get the image data : 
-                    //var avgRGB = getAverageRGB(stage.canvas);
-                    //console.log(avgRGB);
-
                     resize();
                 }
             }, true);
@@ -173,7 +150,6 @@ myApp.directives.directive('annotateimage', ['$isolator',function ($isolator:$is
 
             index = 0;
 
-
             // Setup event listener
             stage.addEventListener("stagemousedown", handleMouseDown);
 
@@ -186,6 +162,8 @@ myApp.directives.directive('annotateimage', ['$isolator',function ($isolator:$is
                 stage.addEventListener("stagemouseup", handleMouseUp);
 
                 currentPointAnnotation = [oldPt.clone()];
+
+                drawingCanvas.graphics.beginStroke(color);
             }
 
             function handleMouseMove(event) {
@@ -193,7 +171,7 @@ myApp.directives.directive('annotateimage', ['$isolator',function ($isolator:$is
                 var newPoint = new createjs.Point(stage.mouseX / stage.scaleX, stage.mouseY / stage.scaleY);
                 var midPt = new createjs.Point((oldPt.x + newPoint.x) / 2, (oldPt.y + newPoint.y) / 2);
 
-                drawingCanvas.graphics.beginStroke(color).moveTo(midPt.x, midPt.y).curveTo(oldPt.x, oldPt.y, oldMidPt.x, oldMidPt.y);
+                drawingCanvas.graphics.moveTo(midPt.x, midPt.y).curveTo(oldPt.x, oldPt.y, oldMidPt.x, oldMidPt.y);                
                 stage.update();
 
                 oldPt = newPoint.clone();
@@ -210,6 +188,8 @@ myApp.directives.directive('annotateimage', ['$isolator',function ($isolator:$is
                 stage.removeEventListener("stagemouseup", handleMouseUp);
 
                 scope.image.pointAnnotation.push(currentPointAnnotation);
+
+                drawingCanvas.graphics.endStroke();
             }
 
         }
