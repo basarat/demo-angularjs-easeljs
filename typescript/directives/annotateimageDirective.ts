@@ -18,9 +18,9 @@ interface AnnotateImageDirectiveScope extends ng.IScope {
     height: number;
 }
 
-myApp.directives.directive('annotateimage', ['$isolator',function ($isolator:$isolatorService): ng.IDirective {
+myApp.directives.directive('annotateimage', ['$isolator', function ($isolator: $isolatorService): ng.IDirective {
     return {
-        restrict: 'E',        
+        restrict: 'E',
         link: (scope: AnnotateImageDirectiveScope, element, attrs) => {
             scope = $isolator.setupDirective(
                 {
@@ -63,7 +63,7 @@ myApp.directives.directive('annotateimage', ['$isolator',function ($isolator:$is
                         var oldPt = pointAnnotation[0];
                         var oldMidPt = oldPt.clone();
 
-                        drawingCanvas.graphics.beginStroke(color); 
+                        drawingCanvas.graphics.beginStroke(color);
 
                         _.forEach(pointAnnotation, (newPoint) => {
                             var midPt = new createjs.Point((oldPt.x + newPoint.x) / 2, (oldPt.y + newPoint.y) / 2);
@@ -95,7 +95,7 @@ myApp.directives.directive('annotateimage', ['$isolator',function ($isolator:$is
                 // This is done by parent already
                 var widthZoom = scope.width / scope.image.width;
                 var heightZoom = scope.height / scope.image.height;
-                minZoom = Math.min(widthZoom, heightZoom);                
+                minZoom = Math.min(widthZoom, heightZoom);
 
                 // Set the zoom so that image takes up entire canvas
                 // This allows us to zoom the stage and everything stays in proportion when we do that
@@ -103,7 +103,7 @@ myApp.directives.directive('annotateimage', ['$isolator',function ($isolator:$is
                 stage.scaleY = minZoom;
 
                 // Set the stroke based on the scale: 
-                drawingCanvas.graphics.clear().setStrokeStyle(10 * (1/minZoom), 'round', 'round');
+                drawingCanvas.graphics.clear().setStrokeStyle(7 * (1 / minZoom), 'round', 'round');
 
                 // At the end of the resize we need to do a redraw
                 redraw();
@@ -166,10 +166,15 @@ myApp.directives.directive('annotateimage', ['$isolator',function ($isolator:$is
 
             function handleMouseMove(event) {
 
+                // If it is outside the image ignore 
+                if (!image.hitTest(stage.mouseX / stage.scaleX, stage.mouseY / stage.scaleY)) {
+                    return;
+                }
+
                 var newPoint = new createjs.Point(stage.mouseX / stage.scaleX, stage.mouseY / stage.scaleY);
                 var midPt = new createjs.Point((oldPt.x + newPoint.x) / 2, (oldPt.y + newPoint.y) / 2);
 
-                drawingCanvas.graphics.moveTo(midPt.x, midPt.y).curveTo(oldPt.x, oldPt.y, oldMidPt.x, oldMidPt.y);                
+                drawingCanvas.graphics.moveTo(midPt.x, midPt.y).curveTo(oldPt.x, oldPt.y, oldMidPt.x, oldMidPt.y);
                 stage.update();
 
                 oldPt = newPoint.clone();
