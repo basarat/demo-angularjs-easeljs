@@ -69,7 +69,7 @@ class AnnotationDisplayManager {
         circleBorderRadius: 3,
         circleFontFamily: 'Arial Bold',
         circleFontSize: 20,
-        circleFontYDisplacement: 12,
+        circleFontYDisplacement: 12, // Depends on the visual properties of the font family
         circleFontColor: 'white',
     }
 
@@ -83,7 +83,8 @@ class AnnotationDisplayManager {
     canvaswidth: number = 1;
     canvasheight: number = 1;
 
-    minZoom: number; // The minimum zoom level we will allow for the internal createjs canvas    
+    minZoom: number; // The minimum zoom level we will allow for the internal createjs canvas
+    currentZoom: number; // The current zoom level
 
     constructor(public canvas: HTMLCanvasElement) {
         bindProtoFunctions(this);
@@ -116,10 +117,10 @@ class AnnotationDisplayManager {
     private renderDrawing(annotationNumber: number, drawing: AnnotationDrawing) {
         // Draw the number         
         // Scale the values
-        var circleRadius = this.annotationSetting.circleRadius / this.minZoom;
-        var circleBorderRadius = circleRadius + this.annotationSetting.circleBorderRadius / this.minZoom;
-        var fontSize = (this.annotationSetting.circleFontSize / this.minZoom);
-        var fontYDisplacement = (this.annotationSetting.circleFontYDisplacement) / this.minZoom;
+        var circleRadius = this.annotationSetting.circleRadius / this.currentZoom;
+        var circleBorderRadius = circleRadius + this.annotationSetting.circleBorderRadius / this.currentZoom;
+        var fontSize = (this.annotationSetting.circleFontSize / this.currentZoom);
+        var fontYDisplacement = (this.annotationSetting.circleFontYDisplacement) / this.currentZoom;
         var fontString = fontSize + 'px ' + this.annotationSetting.circleFontFamily;
         // Draw the circle 
         var circleShape = new createjs.Shape();
@@ -156,7 +157,7 @@ class AnnotationDisplayManager {
     }
 
     private resetDrawingCanvas() {
-        this.drawingCanvas.graphics.clear().setStrokeStyle(this.annotationSetting.lineWidth / this.minZoom, 'round', 'round');
+        this.drawingCanvas.graphics.clear().setStrokeStyle(this.annotationSetting.lineWidth / this.currentZoom, 'round', 'round');
     }
 
     private initialzeUnsavedAnnotations() {
@@ -204,11 +205,12 @@ class AnnotationDisplayManager {
         var widthZoom = width / this.imageModel.width;
         var heightZoom = height / this.imageModel.height;
         this.minZoom = Math.min(widthZoom, heightZoom);
+        this.currentZoom = this.minZoom;
 
         // Set the zoom so that image takes up entire canvas
         // This allows us to zoom the stage and everything stays in proportion when we do that
-        this.stage.scaleX = this.minZoom;
-        this.stage.scaleY = this.minZoom;
+        this.stage.scaleX = this.currentZoom;
+        this.stage.scaleY = this.currentZoom;
 
         // At the end of the resize we need to do a redraw
         this.redraw();
