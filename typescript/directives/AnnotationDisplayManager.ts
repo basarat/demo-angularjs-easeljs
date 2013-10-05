@@ -24,7 +24,8 @@ interface UIAnnotateImage {
     width: number;
     height: number;
     uri: string;
-    annotation: Annotation;
+    annotations: Annotation[];
+    unsavedAnnotation?: Annotation;
 }
 
 interface Annotation {
@@ -67,7 +68,6 @@ class AnnotationDisplayManager {
 
     minZoom: number; // The minimum zoom level we will allow for the internal createjs canvas    
 
-
     constructor(public canvas: HTMLCanvasElement) {
         bindProtoFunctions(this);
 
@@ -75,7 +75,7 @@ class AnnotationDisplayManager {
         this.stage = new createjs.Stage(canvas);
         createjs.Touch.enable(this.stage);
 
-        // Create a drawing canvas for our rendering
+        // Create a drawing canvas for saved drawings
         this.drawingCanvas = new createjs.Shape();
         this.drawingCanvas.shadow = new createjs.Shadow("#000000", 5, 5, 10);
         this.stage.addChild(this.drawingCanvas);
@@ -91,31 +91,39 @@ class AnnotationDisplayManager {
         this.queue = new createjs.LoadQueue(false); // Using false to disble XHR only for file system based demo
     }
 
+    private renderDrawing(drawing: AnnotationDrawing) {
+        // Draw points 
+        if (drawing.points.length == 0) return;
+
+        var oldPt = drawing.points[0];
+        var oldMidPt = oldPt.clone();
+
+        this.drawingCanvas.graphics.beginStroke(this.color);
+
+        _.forEach(drawing.points, (newPoint) => {
+            var midPt = new createjs.Point((oldPt.x + newPoint.x) / 2, (oldPt.y + newPoint.y) / 2);
+
+            this.drawingCanvas.graphics.moveTo(midPt.x, midPt.y).curveTo(oldPt.x, oldPt.y, oldMidPt.x, oldMidPt.y);
+
+            oldPt = newPoint.clone();
+            oldMidPt = midPt.clone();
+        });
+
+        this.drawingCanvas.graphics.endStroke();
+    }
+
     redraw() {
         if (!this.imageModel) return;
 
-        // Draw points 
-        if (this.imageModel.annotation.drawings.length) {
-            _.forEach(this.imageModel.annotation.drawings, (drawing) => {
-                if (drawing.points.length == 0) return;
-
-                var oldPt = drawing.points[0];
-                var oldMidPt = oldPt.clone();
-
-                this.drawingCanvas.graphics.beginStroke(this.color);
-
-                _.forEach(drawing.points, (newPoint) => {
-                    var midPt = new createjs.Point((oldPt.x + newPoint.x) / 2, (oldPt.y + newPoint.y) / 2);
-
-                    this.drawingCanvas.graphics.moveTo(midPt.x, midPt.y).curveTo(oldPt.x, oldPt.y, oldMidPt.x, oldMidPt.y);
-
-                    oldPt = newPoint.clone();
-                    oldMidPt = midPt.clone();
-                });
-
-                this.drawingCanvas.graphics.endStroke();
+        _.forEach(this.imageModel.annotations, (annotation) => {
+            _.forEach(annotation.drawings, (drawing) => {
+                this.renderDrawing(drawing);
             });
-        }
+        });
+
+        _.forEach(this.imageModel.unsavedAnnotation.drawings, (drawing) => {
+            this.renderDrawing(drawing);
+        });
 
         // Render it out
         this.stage.update();
@@ -149,18 +157,19 @@ class AnnotationDisplayManager {
 
     setImageModel(imageModel: UIAnnotateImage) {
         if (!imageModel) return;
-        if (!imageModel.annotation) imageModel.annotation = { index: 1, drawings: [] };
-
         this.imageModel = imageModel;
+
+        // Initialize the unsavedAnnotations
+        this.imageModel.unsavedAnnotation = { index: 1, drawings: [] };
 
         // Get , add , draw the image
         var onComplete = () => {
-            
+
             // If there is already an image remove it
-            if(this.image)
+            if (this.image)
                 this.stage.removeChildAt(0);
 
-            this.image = new createjs.Bitmap(this.queue.getResult("myImage"));            
+            this.image = new createjs.Bitmap(this.queue.getResult("myImage"));
             this.stage.addChildAt(this.image, 0);
             this.stage.update();
 
@@ -174,12 +183,9 @@ class AnnotationDisplayManager {
         ]);
     }
 
-
     currentPointAnnotation: AnnotationDrawing;
     oldPt;
     oldMidPt;
-    title;
-    index;
 
     handleMouseDown(event) {
         this.oldPt = new createjs.Point(this.stage.mouseX / this.stage.scaleX, this.stage.mouseY / this.stage.scaleY);
@@ -187,6 +193,7 @@ class AnnotationDisplayManager {
 
         this.stage.addEventListener("stagemousemove", this.handleMouseMove);
         this.stage.addEventListener("stagemouseup", this.handleMouseUp);
+
 
         this.currentPointAnnotation = {
             points: [this.oldPt.clone()]
@@ -221,7 +228,7 @@ class AnnotationDisplayManager {
         this.stage.removeEventListener("stagemousemove", this.handleMouseMove);
         this.stage.removeEventListener("stagemouseup", this.handleMouseUp);
 
-        this.imageModel.annotation.drawings.push(this.currentPointAnnotation);
+        this.imageModel.unsavedAnnotation.drawings.push(this.currentPointAnnotation);
 
         this.drawingCanvas.graphics.endStroke();
     }
