@@ -11,6 +11,7 @@
 /// <reference path="directives/ratioDirective.ts" />
 /// <reference path="ka/isolator.ts" />
 /// <reference path="services/LogService.ts" />
+/// <reference path="services/StorageService.ts" />
 /// <reference path="vendor.d.ts" />
 //grunt-end
 
