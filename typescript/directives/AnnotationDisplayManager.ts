@@ -1,4 +1,4 @@
-/// <reference path="../reference.ts" />
+﻿/// <reference path="../reference.ts" />
 
 /*
 * Given an object, binds its all prototype methods to the object.
@@ -7,7 +7,7 @@
 * , instead of _.bind and _.bindAll.
 * Make sure that this is the first line in the constructor (when you want to use it). 
 */
-export function bindProtoFunctions(thisObj: any) {
+function bindProtoFunctions(thisObj: any) {
     var args = [thisObj];
     var protos = thisObj.constructor.prototype;
     for (var attr in protos) {
