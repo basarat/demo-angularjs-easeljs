@@ -93,11 +93,9 @@ myApp.directives.directive('annotateimage', ['$isolator',function ($isolator:$is
 
                 // Assumption. The width / height of container matches the proportion for image. 
                 // This is done by parent already
-                var minZoom = scope.width / scope.image.width;
-                if (minZoom.toPrecision(3) != (scope.height / scope.image.height).toPrecision(3)) {
-                    console.warn('The scope width height does not match the aspect ratio of the image');
-                    return;
-                }
+                var widthZoom = scope.width / scope.image.width;
+                var heightZoom = scope.height / scope.image.height;
+                minZoom = Math.min(widthZoom, heightZoom);                
 
                 // Set the zoom so that image takes up entire canvas
                 // This allows us to zoom the stage and everything stays in proportion when we do that
@@ -105,7 +103,7 @@ myApp.directives.directive('annotateimage', ['$isolator',function ($isolator:$is
                 stage.scaleY = minZoom;
 
                 // Set the stroke based on the scale: 
-                drawingCanvas.graphics.clear().setStrokeStyle(minZoom * 1.5, 'round', 'round');
+                drawingCanvas.graphics.clear().setStrokeStyle(10 * (1/minZoom), 'round', 'round');
 
                 // At the end of the resize we need to do a redraw
                 redraw();

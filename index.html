@@ -5,6 +5,13 @@
 
     <link rel="stylesheet" href="vendor/bootstrap/css/bootstrap.css">
 
+    <style>
+        html, body {
+            width: 100%;
+            height:100%;
+        }
+    </style>
+
     <!--Scripts-->
     <script src="vendor/jquery-1.9.1.min.js"></script>
     <script src="vendor/angular.js"></script>
@@ -21,15 +28,15 @@
 <body ng-controller="MainController">
     <br />
     <div class="row row-fluid">
-      <button type="button" class="btn btn-large offset4 span2" ng-click="vm.currentImage=vm.image1">First</button>
-      <button type="button" class="btn btn-large span2" ng-click="vm.currentImage=vm.image2">Second</button>
+        <button type="button" class="btn btn-large offset4 span2" ng-click="vm.currentImage=vm.image1">First</button>
+        <button type="button" class="btn btn-large span2" ng-click="vm.currentImage=vm.image2">Second</button>
     </div>
-    <br />
-    <div ratio="vm.currentImage.height/vm.currentImage.width" 
-        style="width:100%" 
-        calculatedwidth="parentwidth"
-        calculatedheight="parentheight"
-        >
+    
+    <div
+        style="position:absolute;top: 150px;left:10px;right:10px;bottom:10px;"
+        load-size
+        load-size-width="parentwidth"
+        load-size-height="parentheight">
         <annotateimage image="vm.currentImage" width="parentwidth" height="parentheight"></annotateimage>
     </div>
 </body>
