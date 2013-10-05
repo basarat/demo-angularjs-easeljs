@@ -66,7 +66,7 @@ class AnnotationDisplayManager {
         circleRadius: 15,
         circleColor: '#00b8f1', // picme blue 
         circleBorderColor: '#FFFFFF',
-        circleBorderRadius: 5,
+        circleBorderRadius: 3,
         circleFontFamily: 'Arial Bold',
         circleFontSize: 20,
         circleFontYDisplacement: 12,
