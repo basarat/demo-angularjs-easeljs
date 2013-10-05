@@ -27,7 +27,7 @@ myApp.directives.directive('annotateimage', ['$isolator', function ($isolator: $
             // Watch the image
             scope.$watch('image', () => {
                 manager.setImageModel(scope.image);
-            });
+            },true);
 
             // Watch the size 
             scope.$watch('width', () => { manager.resize(scope.width,scope.height) });

@@ -26,10 +26,14 @@ module Controllers {
 
         save() {
             // Copy the unsaved annotation to saved annotations 
-            if (this.image1.unsavedAnnotation)
+            if (this.image1.unsavedAnnotation && this.image1.unsavedAnnotation.drawings.length) {
                 this.image1.annotations.push(this.image1.unsavedAnnotation);
-            if (this.image2.unsavedAnnotation)
+                this.image1.unsavedAnnotation = null;
+            }
+            if (this.image2.unsavedAnnotation && this.image2.unsavedAnnotation.drawings.length) {
                 this.image2.annotations.push(this.image2.unsavedAnnotation);
+                this.image2.unsavedAnnotation = null;
+            }
         }
 
         clear() {
