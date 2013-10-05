@@ -79,7 +79,8 @@ class AnnotationDisplayManager {
 
         // Create a drawing canvas for saved drawings
         this.drawingCanvas = new createjs.Shape();
-        this.drawingCanvas.shadow = new createjs.Shadow(this.annotationShadowColor, 5, 5, 10);
+        this.drawingCanvasShadow = new createjs.Shadow(this.annotationShadowColor, 5, 5, 10);        
+        this.drawingCanvas.shadow = this.drawingCanvasShadow;
         this.stage.addChild(this.drawingCanvas);
 
         // Stage behaviours 
@@ -100,7 +101,7 @@ class AnnotationDisplayManager {
         var oldPt = drawing.points[0];
         var oldMidPt = oldPt.clone();
 
-        this.drawingCanvas.graphics.beginStroke(this.annotationColor);
+        
 
         _.forEach(drawing.points, (newPoint) => {
             var midPt = new createjs.Point((oldPt.x + newPoint.x) / 2, (oldPt.y + newPoint.y) / 2);
@@ -111,17 +112,18 @@ class AnnotationDisplayManager {
             oldMidPt = midPt.clone();
         });
 
-        this.drawingCanvas.graphics.endStroke();
     }
 
     private resetDrawingCanvas() {        
-        this.drawingCanvas.graphics.clear().setStrokeStyle(7 * (1 / this.minZoom), 'round', 'round');
+        this.drawingCanvas.graphics.clear().setStrokeStyle(7 * (1 / this.minZoom), 'round', 'round');        
     }
 
     redraw() {
         if (!this.imageModel) return;
 
         this.resetDrawingCanvas();
+
+        this.drawingCanvas.graphics.beginStroke(this.annotationColor);
 
         _.forEach(this.imageModel.annotations, (annotation) => {
             _.forEach(annotation.drawings, (drawing) => {
@@ -132,6 +134,9 @@ class AnnotationDisplayManager {
         _.forEach(this.imageModel.unsavedAnnotation.drawings, (drawing) => {
             this.renderDrawing(drawing);
         });
+
+        this.drawingCanvas.graphics.endStroke();
+
 
         // Render it out
         this.stage.update();
@@ -235,9 +240,7 @@ class AnnotationDisplayManager {
         this.stage.removeEventListener("stagemouseup", this.handleMouseUp);
 
         this.imageModel.unsavedAnnotation.drawings.push(this.currentPointAnnotation);
-
-        // Why bother with: 
-        // this.drawingCanvas.graphics.endStroke();
+                
         // Just redraw: 
         this.redraw();
     }

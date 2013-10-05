@@ -21,11 +21,8 @@ myApp.directives.directive('annotateimage', ['$isolator', function ($isolator: $
 
             // Find the canvas
             var canvas: HTMLCanvasElement = <HTMLCanvasElement>element.find('canvas')[0];
-
+            // Setup the manager only once
             var manager = new AnnotationDisplayManager(canvas);
-
-            
-
 
             // Watch the image
             scope.$watch('image', () => {
