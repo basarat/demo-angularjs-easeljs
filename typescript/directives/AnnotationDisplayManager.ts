@@ -36,7 +36,7 @@ interface Annotation {
 interface AnnotationDrawing {
     //type: string;
     points?: Point[]; // valid for brushes
-    numberLocation: Point;
+    numberLocation: Point; // for quicker calc. Can be determined from points
 }
 
 interface Point {
