@@ -31,7 +31,7 @@ function bindProtoFunctions(thisObj: any) {
 class AnnotationDisplayManager {
 
     stage: createjs.Stage;
-    image: createjs.Bitmap;
+    image: createjs.Bitmap; // The bottom image DisplayObject
 
     drawingCanvas: createjs.Shape;
     color = 'white'; // The annotation color by default
