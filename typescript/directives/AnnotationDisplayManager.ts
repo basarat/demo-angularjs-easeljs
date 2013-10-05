@@ -35,8 +35,8 @@ interface Annotation {
 
 interface AnnotationDrawing {
     //type: string;
-    points?: createjs.Point[]; // valid for brushes
-    numberLocation: createjs.Point;
+    points?: Point[]; // valid for brushes
+    numberLocation: Point;
 }
 
 interface Point {
@@ -114,6 +114,22 @@ class AnnotationDisplayManager {
         this.queue = new createjs.LoadQueue(false); // Using false to disble XHR only for file system based demo
     }
 
+    // Returns a scaled value of the point based on the image dimensions
+    private createJSPoint_to_pixel(point: createjs.Point): Point {
+        var x = (point.x);
+        var y = (point.y);
+        return {
+            x: x,
+            y: y
+        };
+    }
+
+    private pixel_to_createJSPoint(point: Point): createjs.Point {
+        var x = (point.x);
+        var y = (point.y);
+        return new createjs.Point(x, y);
+    }
+
     private renderDrawing(annotationNumber: number, drawing: AnnotationDrawing) {
         // Draw the number         
         // Scale the values
@@ -142,10 +158,11 @@ class AnnotationDisplayManager {
         // Draw points 
         if (drawing.points.length == 0) return;
 
-        var oldPt = drawing.points[0];
+        var oldPt = this.pixel_to_createJSPoint(drawing.points[0]);
         var oldMidPt = oldPt.clone();
 
-        _.forEach(drawing.points, (newPoint) => {
+        _.forEach(drawing.points, (pixelPoint) => {
+            var newPoint = this.pixel_to_createJSPoint(pixelPoint);
             var midPt = new createjs.Point((oldPt.x + newPoint.x) / 2, (oldPt.y + newPoint.y) / 2);
 
             this.drawingCanvas.graphics.moveTo(midPt.x, midPt.y).curveTo(oldPt.x, oldPt.y, oldMidPt.x, oldMidPt.y);
@@ -267,7 +284,7 @@ class AnnotationDisplayManager {
 
         this.currentPointAnnotation = {
             numberLocation: null,
-            points: [this.oldPt.clone()]
+            points: [this.createJSPoint_to_pixel(this.oldPt)]
         };
 
         this.drawingCanvas.graphics.beginStroke(this.annotationSetting.color);
@@ -292,7 +309,8 @@ class AnnotationDisplayManager {
         this.oldMidPt.y = midPt.y;
 
         // Store 
-        this.currentPointAnnotation.points.push(this.oldPt.clone());
+        var pixelpoint = this.createJSPoint_to_pixel(this.oldPt);        
+        this.currentPointAnnotation.points.push(pixelpoint);
     }
 
     handleMouseUp(event) {
