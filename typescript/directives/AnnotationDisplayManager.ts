@@ -113,7 +113,7 @@ class AnnotationDisplayManager {
         this.queue = new createjs.LoadQueue(false); // Using false to disble XHR only for file system based demo
     }
 
-    private renderDrawing(annotationNumber: number, drawing: AnnotationDrawing) {        
+    private renderDrawing(annotationNumber: number, drawing: AnnotationDrawing) {
         // Draw the number         
         // Scale the values
         var circleRadius = this.annotationSetting.circleRadius / this.minZoom;
@@ -157,6 +157,10 @@ class AnnotationDisplayManager {
 
     private resetDrawingCanvas() {
         this.drawingCanvas.graphics.clear().setStrokeStyle(this.annotationSetting.lineWidth / this.minZoom, 'round', 'round');
+    }
+
+    private initialzeUnsavedAnnotations() {
+        this.imageModel.unsavedAnnotation = { index: this.imageModel.annotations.length + 1, drawings: [] };
     }
 
     redraw() {
@@ -214,9 +218,8 @@ class AnnotationDisplayManager {
         if (!imageModel) return;
         this.imageModel = imageModel;
 
-        // Initialize the unsavedAnnotations
-        var index = this.imageModel.annotations.length;
-        this.imageModel.unsavedAnnotation = { index: index + 1, drawings: [] };
+        // Initialize the unsavedAnnotations        
+        this.initialzeUnsavedAnnotations();
 
         // Get , add , draw the image
         var onComplete = () => {
@@ -299,6 +302,10 @@ class AnnotationDisplayManager {
         var minx: number = _.min(this.currentPointAnnotation.points, (point) => point.x).x;
         var miny: number = _.min(this.currentPointAnnotation.points, (point) => point.y).y;
         this.currentPointAnnotation.numberLocation = new createjs.Point(minx, miny);
+
+        // Setup unsaved annotations if they are not already setup: 
+        if (!this.imageModel.unsavedAnnotation) this.initialzeUnsavedAnnotations();
+        // Add to the unsaved annotations 
         this.imageModel.unsavedAnnotation.drawings.push(this.currentPointAnnotation);
 
         // Just redraw: 
