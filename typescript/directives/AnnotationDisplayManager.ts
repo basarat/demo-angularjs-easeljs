@@ -36,13 +36,13 @@ interface Annotation {
 interface AnnotationDrawing {
     //type: string;
     points?: createjs.Point[]; // valid for brushes
+    //numberLocation: createjs.Point;
 }
 
 interface Point {
     x: number;
     y: number;
 }
-
 
 // Has the following responsibilities: 
 // - Draw the image 
@@ -59,7 +59,9 @@ class AnnotationDisplayManager {
     queue: createjs.LoadQueue;
 
     drawingCanvas: createjs.Shape;
+    drawingCanvasShadow: createjs.Shadow;
     color = 'white'; // The annotation color by default
+    shadowColor = "#000000";
 
     imageModel: UIAnnotateImage;
 
@@ -77,7 +79,7 @@ class AnnotationDisplayManager {
 
         // Create a drawing canvas for saved drawings
         this.drawingCanvas = new createjs.Shape();
-        this.drawingCanvas.shadow = new createjs.Shadow("#000000", 5, 5, 10);
+        this.drawingCanvas.shadow = new createjs.Shadow(this.shadowColor, 5, 5, 10);
         this.stage.addChild(this.drawingCanvas);
 
         // Stage behaviours 
@@ -114,6 +116,8 @@ class AnnotationDisplayManager {
 
     redraw() {
         if (!this.imageModel) return;
+
+        //this.drawingCanvas.graphics.clear();
 
         _.forEach(this.imageModel.annotations, (annotation) => {
             _.forEach(annotation.drawings, (drawing) => {
@@ -160,7 +164,8 @@ class AnnotationDisplayManager {
         this.imageModel = imageModel;
 
         // Initialize the unsavedAnnotations
-        this.imageModel.unsavedAnnotation = { index: 1, drawings: [] };
+        var index = this.imageModel.annotations.length;
+        this.imageModel.unsavedAnnotation = { index: index + 1, drawings: [] };
 
         // Get , add , draw the image
         var onComplete = () => {
@@ -230,6 +235,9 @@ class AnnotationDisplayManager {
 
         this.imageModel.unsavedAnnotation.drawings.push(this.currentPointAnnotation);
 
-        this.drawingCanvas.graphics.endStroke();
+        // Why bother with: 
+         this.drawingCanvas.graphics.endStroke();
+        // Just redraw: 
+        //this.redraw();
     }
 }
