@@ -4,7 +4,12 @@ interface UIAnnotateImage {
     width: number;
     height: number;
     uri: string;
-    pointAnnotation: createjs.Point[][];
+    annotations: Annotation[];
+}
+
+interface Annotation {
+    //type: string;
+    points?: createjs.Point[]; // valid for brushes
 }
 
 interface Point {
@@ -56,16 +61,16 @@ myApp.directives.directive('annotateimage', ['$isolator', function ($isolator: $
                 if (!scope.image) return;
 
                 // Draw points 
-                if (scope.image.pointAnnotation.length) {
-                    _.forEach(scope.image.pointAnnotation, (pointAnnotation) => {
-                        if (pointAnnotation.length == 0) return;
+                if (scope.image.annotations.length) {
+                    _.forEach(scope.image.annotations, (pointAnnotation) => {
+                        if (pointAnnotation.points.length == 0) return;
 
-                        var oldPt = pointAnnotation[0];
+                        var oldPt = pointAnnotation.points[0];
                         var oldMidPt = oldPt.clone();
 
                         drawingCanvas.graphics.beginStroke(color);
 
-                        _.forEach(pointAnnotation, (newPoint) => {
+                        _.forEach(pointAnnotation.points, (newPoint) => {
                             var midPt = new createjs.Point((oldPt.x + newPoint.x) / 2, (oldPt.y + newPoint.y) / 2);
 
                             drawingCanvas.graphics.moveTo(midPt.x, midPt.y).curveTo(oldPt.x, oldPt.y, oldMidPt.x, oldMidPt.y);
@@ -115,6 +120,7 @@ myApp.directives.directive('annotateimage', ['$isolator', function ($isolator: $
                 if (!scope.image) return;
 
                 // TODO: actually remove everything.
+                // We are not removing the drawing canvas right now
                 if (image) {
                     stage.removeChildAt(0);
                 }
@@ -151,7 +157,7 @@ myApp.directives.directive('annotateimage', ['$isolator', function ($isolator: $
             // Setup event listener
             stage.addEventListener("stagemousedown", handleMouseDown);
 
-            var currentPointAnnotation: createjs.Point[];
+            var currentPointAnnotation: Annotation;
             function handleMouseDown(event) {
                 oldPt = new createjs.Point(stage.mouseX / stage.scaleX, stage.mouseY / stage.scaleY);
                 oldMidPt = oldPt;
@@ -159,7 +165,9 @@ myApp.directives.directive('annotateimage', ['$isolator', function ($isolator: $
                 stage.addEventListener("stagemousemove", handleMouseMove);
                 stage.addEventListener("stagemouseup", handleMouseUp);
 
-                currentPointAnnotation = [oldPt.clone()];
+                currentPointAnnotation = {
+                    points:[oldPt.clone()]
+                };
 
                 drawingCanvas.graphics.beginStroke(color);
             }
@@ -183,14 +191,14 @@ myApp.directives.directive('annotateimage', ['$isolator', function ($isolator: $
                 oldMidPt.y = midPt.y;
 
                 // Store 
-                currentPointAnnotation.push(oldPt.clone());
+                currentPointAnnotation.points.push(oldPt.clone());
             }
 
             function handleMouseUp(event) {
                 stage.removeEventListener("stagemousemove", handleMouseMove);
                 stage.removeEventListener("stagemouseup", handleMouseUp);
 
-                scope.image.pointAnnotation.push(currentPointAnnotation);
+                scope.image.annotations.push(currentPointAnnotation);
 
                 drawingCanvas.graphics.endStroke();
             }
