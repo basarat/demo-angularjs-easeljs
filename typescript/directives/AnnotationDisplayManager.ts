@@ -36,7 +36,7 @@ interface Annotation {
 interface AnnotationDrawing {
     //type: string;
     points?: createjs.Point[]; // valid for brushes
-    //numberLocation: createjs.Point;
+    numberLocation: createjs.Point;
 }
 
 interface Point {
@@ -58,10 +58,25 @@ class AnnotationDisplayManager {
     image: createjs.Bitmap; // The bottom image DisplayObject
     queue: createjs.LoadQueue;
 
+    annotationSetting = {
+        color: 'white',
+        shadow: '#000000',
+        lineWidth: 4,
+
+        circleRadius: 15,
+        circleColor: '#00b8f1', // picme blue 
+        circleBorderColor: '#FFFFFF',
+        circleBorderRadius: 5,
+        circleFontFamily: 'Arial Bold',
+        circleFontSize: 20,
+        circleFontYDisplacement: 12,
+        circleFontColor: 'white',
+    }
+
     drawingCanvas: createjs.Shape;
     drawingCanvasShadow: createjs.Shadow;
-    annotationColor = 'white'; // The annotation color by default
-    annotationShadowColor = "#000000";
+
+    annotationNumberLayer: createjs.Container;
 
     imageModel: UIAnnotateImage;
 
@@ -77,11 +92,15 @@ class AnnotationDisplayManager {
         this.stage = new createjs.Stage(canvas);
         createjs.Touch.enable(this.stage);
 
-        // Create a drawing canvas for saved drawings
+        // Create a drawing canvas for annotation drawings
         this.drawingCanvas = new createjs.Shape();
-        this.drawingCanvasShadow = new createjs.Shadow(this.annotationShadowColor, 5, 5, 10);        
+        this.drawingCanvasShadow = new createjs.Shadow(this.annotationSetting.shadow, 5, 5, 15);
         this.drawingCanvas.shadow = this.drawingCanvasShadow;
         this.stage.addChild(this.drawingCanvas);
+
+        // Create a drawing container for annotation numbers
+        this.annotationNumberLayer = new createjs.Container();
+        this.stage.addChild(this.annotationNumberLayer);
 
         // Stage behaviours 
         this.stage.autoClear = true;
@@ -94,14 +113,36 @@ class AnnotationDisplayManager {
         this.queue = new createjs.LoadQueue(false); // Using false to disble XHR only for file system based demo
     }
 
-    private renderDrawing(drawing: AnnotationDrawing) {
+    private renderDrawing(annotationNumber: number, drawing: AnnotationDrawing) {        
+        // Draw the number         
+        // Scale the values
+        var circleRadius = this.annotationSetting.circleRadius / this.minZoom;
+        var circleBorderRadius = circleRadius + this.annotationSetting.circleBorderRadius / this.minZoom;
+        var fontSize = (this.annotationSetting.circleFontSize / this.minZoom);
+        var fontYDisplacement = (this.annotationSetting.circleFontYDisplacement) / this.minZoom;
+        var fontString = fontSize + 'px ' + this.annotationSetting.circleFontFamily;
+        // Draw the circle 
+        var circleShape = new createjs.Shape();
+        var g = circleShape.graphics;
+        g.beginFill(this.annotationSetting.circleBorderColor);
+        g.drawCircle(drawing.numberLocation.x, drawing.numberLocation.y, circleBorderRadius);
+        g.endFill();
+        g.beginFill(this.annotationSetting.circleColor);
+        g.drawCircle(drawing.numberLocation.x, drawing.numberLocation.y, circleRadius);
+        g.endFill();
+        this.annotationNumberLayer.addChild(circleShape);
+        // Draw the text 
+        var numberShape = new createjs.Text(annotationNumber.toString(), fontString, this.annotationSetting.circleFontColor);
+        numberShape.x = drawing.numberLocation.x;
+        numberShape.y = drawing.numberLocation.y - fontYDisplacement;
+        numberShape.textAlign = 'center'
+        this.annotationNumberLayer.addChild(numberShape);
+
         // Draw points 
         if (drawing.points.length == 0) return;
 
         var oldPt = drawing.points[0];
         var oldMidPt = oldPt.clone();
-
-        
 
         _.forEach(drawing.points, (newPoint) => {
             var midPt = new createjs.Point((oldPt.x + newPoint.x) / 2, (oldPt.y + newPoint.y) / 2);
@@ -114,27 +155,31 @@ class AnnotationDisplayManager {
 
     }
 
-    private resetDrawingCanvas() {        
-        this.drawingCanvas.graphics.clear().setStrokeStyle(7 * (1 / this.minZoom), 'round', 'round');        
+    private resetDrawingCanvas() {
+        this.drawingCanvas.graphics.clear().setStrokeStyle(this.annotationSetting.lineWidth / this.minZoom, 'round', 'round');
     }
 
     redraw() {
         if (!this.imageModel) return;
 
+        // Clear
         this.resetDrawingCanvas();
+        this.annotationNumberLayer.removeAllChildren();
 
-        this.drawingCanvas.graphics.beginStroke(this.annotationColor);
+        // Setup Start
+        this.drawingCanvas.graphics.beginStroke(this.annotationSetting.color);
 
         _.forEach(this.imageModel.annotations, (annotation) => {
             _.forEach(annotation.drawings, (drawing) => {
-                this.renderDrawing(drawing);
+                this.renderDrawing(annotation.index, drawing);
             });
         });
 
         _.forEach(this.imageModel.unsavedAnnotation.drawings, (drawing) => {
-            this.renderDrawing(drawing);
+            this.renderDrawing(this.imageModel.unsavedAnnotation.index, drawing);
         });
 
+        // Setup End
         this.drawingCanvas.graphics.endStroke();
 
 
@@ -198,7 +243,16 @@ class AnnotationDisplayManager {
     oldPt;
     oldMidPt;
 
+    private isMouseOutsideImage() {
+        return !this.image.hitTest(this.stage.mouseX / this.stage.scaleX, this.stage.mouseY / this.stage.scaleY);
+    }
+
     handleMouseDown(event) {
+        // If it is outside the image ignore 
+        if (this.isMouseOutsideImage()) {
+            return;
+        }
+
         this.oldPt = new createjs.Point(this.stage.mouseX / this.stage.scaleX, this.stage.mouseY / this.stage.scaleY);
         this.oldMidPt = this.oldPt;
 
@@ -207,16 +261,17 @@ class AnnotationDisplayManager {
 
 
         this.currentPointAnnotation = {
+            numberLocation: null,
             points: [this.oldPt.clone()]
         };
 
-        this.drawingCanvas.graphics.beginStroke(this.annotationColor);
+        this.drawingCanvas.graphics.beginStroke(this.annotationSetting.color);
     }
 
     handleMouseMove(event) {
 
         // If it is outside the image ignore 
-        if (!this.image.hitTest(this.stage.mouseX / this.stage.scaleX, this.stage.mouseY / this.stage.scaleY)) {
+        if (this.isMouseOutsideImage()) {
             return;
         }
 
@@ -239,8 +294,13 @@ class AnnotationDisplayManager {
         this.stage.removeEventListener("stagemousemove", this.handleMouseMove);
         this.stage.removeEventListener("stagemouseup", this.handleMouseUp);
 
+        // Calculate the number location: 
+        // Find the min x and min y: 
+        var minx: number = _.min(this.currentPointAnnotation.points, (point) => point.x).x;
+        var miny: number = _.min(this.currentPointAnnotation.points, (point) => point.y).y;
+        this.currentPointAnnotation.numberLocation = new createjs.Point(minx, miny);
         this.imageModel.unsavedAnnotation.drawings.push(this.currentPointAnnotation);
-                
+
         // Just redraw: 
         this.redraw();
     }
