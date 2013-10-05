@@ -60,8 +60,8 @@ class AnnotationDisplayManager {
 
     drawingCanvas: createjs.Shape;
     drawingCanvasShadow: createjs.Shadow;
-    color = 'white'; // The annotation color by default
-    shadowColor = "#000000";
+    annotationColor = 'white'; // The annotation color by default
+    annotationShadowColor = "#000000";
 
     imageModel: UIAnnotateImage;
 
@@ -79,7 +79,7 @@ class AnnotationDisplayManager {
 
         // Create a drawing canvas for saved drawings
         this.drawingCanvas = new createjs.Shape();
-        this.drawingCanvas.shadow = new createjs.Shadow(this.shadowColor, 5, 5, 10);
+        this.drawingCanvas.shadow = new createjs.Shadow(this.annotationShadowColor, 5, 5, 10);
         this.stage.addChild(this.drawingCanvas);
 
         // Stage behaviours 
@@ -100,7 +100,7 @@ class AnnotationDisplayManager {
         var oldPt = drawing.points[0];
         var oldMidPt = oldPt.clone();
 
-        this.drawingCanvas.graphics.beginStroke(this.color);
+        this.drawingCanvas.graphics.beginStroke(this.annotationColor);
 
         _.forEach(drawing.points, (newPoint) => {
             var midPt = new createjs.Point((oldPt.x + newPoint.x) / 2, (oldPt.y + newPoint.y) / 2);
@@ -114,10 +114,14 @@ class AnnotationDisplayManager {
         this.drawingCanvas.graphics.endStroke();
     }
 
+    private resetDrawingCanvas() {        
+        this.drawingCanvas.graphics.clear().setStrokeStyle(7 * (1 / this.minZoom), 'round', 'round');
+    }
+
     redraw() {
         if (!this.imageModel) return;
 
-        //this.drawingCanvas.graphics.clear();
+        this.resetDrawingCanvas();
 
         _.forEach(this.imageModel.annotations, (annotation) => {
             _.forEach(annotation.drawings, (drawing) => {
@@ -151,9 +155,6 @@ class AnnotationDisplayManager {
         // This allows us to zoom the stage and everything stays in proportion when we do that
         this.stage.scaleX = this.minZoom;
         this.stage.scaleY = this.minZoom;
-
-        // Set the stroke based on the scale: 
-        this.drawingCanvas.graphics.clear().setStrokeStyle(7 * (1 / this.minZoom), 'round', 'round');
 
         // At the end of the resize we need to do a redraw
         this.redraw();
@@ -204,7 +205,7 @@ class AnnotationDisplayManager {
             points: [this.oldPt.clone()]
         };
 
-        this.drawingCanvas.graphics.beginStroke(this.color);
+        this.drawingCanvas.graphics.beginStroke(this.annotationColor);
     }
 
     handleMouseMove(event) {
@@ -236,8 +237,8 @@ class AnnotationDisplayManager {
         this.imageModel.unsavedAnnotation.drawings.push(this.currentPointAnnotation);
 
         // Why bother with: 
-         this.drawingCanvas.graphics.endStroke();
+        // this.drawingCanvas.graphics.endStroke();
         // Just redraw: 
-        //this.redraw();
+        this.redraw();
     }
 }
