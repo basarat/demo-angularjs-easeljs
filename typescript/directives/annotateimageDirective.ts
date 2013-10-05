@@ -42,8 +42,7 @@ myApp.directives.directive('annotateimage', ['$isolator', function ($isolator: $
             createjs.Touch.enable(stage);
 
             // Defaults
-            var color = 'white';
-            var stroke = 5;
+            var color = 'white';            
 
             // Create a drawing canvas for our rendering
             var drawingCanvas = new createjs.Shape();
