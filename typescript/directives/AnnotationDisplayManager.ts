@@ -20,6 +20,29 @@ function bindProtoFunctions(thisObj: any) {
 }
 
 
+interface UIAnnotateImage {
+    width: number;
+    height: number;
+    uri: string;
+    annotation: Annotation;
+}
+
+interface Annotation {
+    index: number;
+    drawings: AnnotationDrawing[];
+}
+
+interface AnnotationDrawing {
+    //type: string;
+    points?: createjs.Point[]; // valid for brushes
+}
+
+interface Point {
+    x: number;
+    y: number;
+}
+
+
 // Has the following responsibilities: 
 // - Draw the image 
 // - Draw the annotations. The annotation draw loop
@@ -32,6 +55,7 @@ class AnnotationDisplayManager {
 
     stage: createjs.Stage;
     image: createjs.Bitmap; // The bottom image DisplayObject
+    queue: createjs.LoadQueue;
 
     drawingCanvas: createjs.Shape;
     color = 'white'; // The annotation color by default
@@ -41,7 +65,8 @@ class AnnotationDisplayManager {
     canvaswidth: number = 1;
     canvasheight: number = 1;
 
-    minZoom: number; // The minimum zoom level we will allow for the internal createjs canvas
+    minZoom: number; // The minimum zoom level we will allow for the internal createjs canvas    
+
 
     constructor(public canvas: HTMLCanvasElement) {
         bindProtoFunctions(this);
@@ -61,22 +86,25 @@ class AnnotationDisplayManager {
 
         // Setup event listener
         this.stage.addEventListener("stagemousedown", this.handleMouseDown);
+
+        // Setup the load queue
+        this.queue = new createjs.LoadQueue(false); // Using false to disble XHR only for file system based demo
     }
 
     redraw() {
         if (!this.imageModel) return;
 
         // Draw points 
-        if (this.imageModel.annotations.length) {
-            _.forEach(this.imageModel.annotations, (pointAnnotation) => {
-                if (pointAnnotation.points.length == 0) return;
+        if (this.imageModel.annotation.drawings.length) {
+            _.forEach(this.imageModel.annotation.drawings, (drawing) => {
+                if (drawing.points.length == 0) return;
 
-                var oldPt = pointAnnotation.points[0];
+                var oldPt = drawing.points[0];
                 var oldMidPt = oldPt.clone();
 
                 this.drawingCanvas.graphics.beginStroke(this.color);
 
-                _.forEach(pointAnnotation.points, (newPoint) => {
+                _.forEach(drawing.points, (newPoint) => {
                     var midPt = new createjs.Point((oldPt.x + newPoint.x) / 2, (oldPt.y + newPoint.y) / 2);
 
                     this.drawingCanvas.graphics.moveTo(midPt.x, midPt.y).curveTo(oldPt.x, oldPt.y, oldMidPt.x, oldMidPt.y);
@@ -102,8 +130,7 @@ class AnnotationDisplayManager {
         this.stage.canvas.width = width;
         this.stage.canvas.height = height;
 
-        // Assumption. The width / height of container matches the proportion for image. 
-        // This is done by parent already
+        // Find the best fit for the image
         var widthZoom = width / this.imageModel.width;
         var heightZoom = height / this.imageModel.height;
         this.minZoom = Math.min(widthZoom, heightZoom);
@@ -122,17 +149,18 @@ class AnnotationDisplayManager {
 
     setImageModel(imageModel: UIAnnotateImage) {
         if (!imageModel) return;
+        if (!imageModel.annotation) imageModel.annotation = { index: 1, drawings: [] };
+
         this.imageModel = imageModel;
 
-        // TODO: actually remove everything.
-        // We are not removing the drawing canvas right now
-        if (this.image) {
-            this.stage.removeChildAt(0);
-        }
-
+        // Get , add , draw the image
         var onComplete = () => {
-            // Get , add , draw the image
-            this.image = new createjs.Bitmap(queue.getResult("myImage"));
+            
+            // If there is already an image remove it
+            if(this.image)
+                this.stage.removeChildAt(0);
+
+            this.image = new createjs.Bitmap(this.queue.getResult("myImage"));            
             this.stage.addChildAt(this.image, 0);
             this.stage.update();
 
@@ -140,15 +168,14 @@ class AnnotationDisplayManager {
         }
 
         // Load the image async
-        var queue = new createjs.LoadQueue(false); // Using false to disble XHR only for file system based demo
-        queue.addEventListener("complete", onComplete);
-        queue.loadManifest([
+        this.queue.addEventListener("complete", onComplete);
+        this.queue.loadManifest([
             { id: "myImage", src: imageModel.uri }
         ]);
     }
 
 
-    currentPointAnnotation: Annotation;
+    currentPointAnnotation: AnnotationDrawing;
     oldPt;
     oldMidPt;
     title;
@@ -194,7 +221,7 @@ class AnnotationDisplayManager {
         this.stage.removeEventListener("stagemousemove", this.handleMouseMove);
         this.stage.removeEventListener("stagemouseup", this.handleMouseUp);
 
-        this.imageModel.annotations.push(this.currentPointAnnotation);
+        this.imageModel.annotation.drawings.push(this.currentPointAnnotation);
 
         this.drawingCanvas.graphics.endStroke();
     }

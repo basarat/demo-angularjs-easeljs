@@ -9,14 +9,14 @@ module Controllers{
             uri: './images/550x190.png',
             width: 550,
             height: 190,
-            annotations: []
+            annotation: null
         }
 
         image2: UIAnnotateImage = {
             uri: './images/spacesloth.jpg',
             width: 552,
             height: 704,
-            annotations: []
+            annotation: null
         }
 
         constructor($scope) {

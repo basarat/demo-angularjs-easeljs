@@ -1,21 +1,6 @@
 /// <reference path="../reference.ts" />
 
-interface UIAnnotateImage {
-    width: number;
-    height: number;
-    uri: string;
-    annotations: Annotation[];
-}
 
-interface Annotation {
-    //type: string;
-    points?: createjs.Point[]; // valid for brushes
-}
-
-interface Point {
-    x: number;
-    y: number;
-}
 
 interface AnnotateImageDirectiveScope extends ng.IScope {
     image: UIAnnotateImage;
