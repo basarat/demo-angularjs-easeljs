@@ -5,17 +5,17 @@ class BrushTool {
 
     active: boolean; // Is this tool active 
 
-    constructor(public drawingCanvas: createjs.Shape,public annotationSetting) { }
+    constructor(public drawingCanvas: createjs.Shape) { }
 
     renderDrawing(drawing: AnnotationDrawing) {
         // Draw points 
         if (drawing.points.length == 0) return;
 
-        var oldPt = createjsUtils.pixel_to_createJSPoint(drawing.points[0]);
+        var oldPt = annotationsModule.pixel_to_createJSPoint(drawing.points[0]);
         var oldMidPt = oldPt.clone();
 
         _.forEach(drawing.points, (pixelPoint) => {
-            var newPoint = createjsUtils.pixel_to_createJSPoint(pixelPoint);
+            var newPoint = annotationsModule.pixel_to_createJSPoint(pixelPoint);
             var midPt = new createjs.Point((oldPt.x + newPoint.x) / 2, (oldPt.y + newPoint.y) / 2);
 
             this.drawingCanvas.graphics.moveTo(midPt.x, midPt.y).curveTo(oldPt.x, oldPt.y, oldMidPt.x, oldMidPt.y);
@@ -37,10 +37,10 @@ class BrushTool {
         this.currentPointAnnotation = {
             type: ToolType.brush,
             numberLocation: null,
-            points: [createjsUtils.createJSPoint_to_pixel(this.oldPt)]
+            points: [annotationsModule.createJSPoint_to_pixel(this.oldPt)]
         };
 
-        this.drawingCanvas.graphics.beginStroke(this.annotationSetting.color);
+        this.drawingCanvas.graphics.beginStroke(annotationsModule.annotationSetting.color);
     }
 
     handleMouseMove(pixelx: number, pixely: number) {
@@ -57,7 +57,7 @@ class BrushTool {
         this.oldMidPt.y = midPt.y;
 
         // Store 
-        var pixelpoint = createjsUtils.createJSPoint_to_pixel(this.oldPt);
+        var pixelpoint = annotationsModule.createJSPoint_to_pixel(this.oldPt);
         this.currentPointAnnotation.points.push(pixelpoint);
     }
 

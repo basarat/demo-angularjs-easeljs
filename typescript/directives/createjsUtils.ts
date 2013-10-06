@@ -5,7 +5,23 @@ module ToolType {
     export var rectangle = "rectangle";
 }
 
-module createjsUtils {
+module annotationsModule {
+
+    export var annotationSetting = {
+        color: 'white',
+        shadow: '#000000',
+        lineWidth: 4,
+
+        circleRadius: 15,
+        circleColor: '#00b8f1', // picme blue 
+        circleBorderColor: '#FFFFFF',
+        circleBorderRadius: 3,
+        circleFontFamily: 'Arial Bold',
+        circleFontSize: 20,
+        circleFontYDisplacement: 12, // Depends on the visual properties of the font family
+        circleFontColor: 'white',
+    }
+
 
     // Returns a scaled value of the point based on the image dimensions
     export function createJSPoint_to_pixel(point: createjs.Point): Point {

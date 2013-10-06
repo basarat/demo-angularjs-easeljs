@@ -56,22 +56,7 @@ class AnnotationDisplayManager {
 
     stage: createjs.Stage;
     image: createjs.Bitmap; // The bottom image DisplayObject
-    queue: createjs.LoadQueue;
-
-    annotationSetting = {
-        color: 'white',
-        shadow: '#000000',
-        lineWidth: 4,
-
-        circleRadius: 15,
-        circleColor: '#00b8f1', // picme blue 
-        circleBorderColor: '#FFFFFF',
-        circleBorderRadius: 3,
-        circleFontFamily: 'Arial Bold',
-        circleFontSize: 20,
-        circleFontYDisplacement: 12, // Depends on the visual properties of the font family
-        circleFontColor: 'white',
-    }
+    queue: createjs.LoadQueue;    
 
     drawingCanvas: createjs.Shape;
     drawingCanvasShadow: createjs.Shadow;
@@ -99,7 +84,7 @@ class AnnotationDisplayManager {
 
         // Create a drawing canvas for annotation drawings
         this.drawingCanvas = new createjs.Shape();
-        this.drawingCanvasShadow = new createjs.Shadow(this.annotationSetting.shadow, 5, 5, 15);
+        this.drawingCanvasShadow = new createjs.Shadow(annotationsModule.annotationSetting.shadow, 5, 5, 15);
         this.drawingCanvas.shadow = this.drawingCanvasShadow;
         this.stage.addChild(this.drawingCanvas);
 
@@ -118,7 +103,7 @@ class AnnotationDisplayManager {
         this.queue = new createjs.LoadQueue(false); // Using false to disble XHR only for file system based demo
 
         // Setup the tools: 
-        this.brushTool = new BrushTool(this.drawingCanvas, this.annotationSetting);
+        this.brushTool = new BrushTool(this.drawingCanvas);
 
         // Setup the active tool:
         this.activeTool = ToolType.brush;
@@ -129,23 +114,23 @@ class AnnotationDisplayManager {
     private renderDrawing(annotationNumber: number, drawing: AnnotationDrawing) {
         // Draw the number         
         // Scale the values
-        var circleRadius = this.annotationSetting.circleRadius / this.currentZoom;
-        var circleBorderRadius = circleRadius + this.annotationSetting.circleBorderRadius / this.currentZoom;
-        var fontSize = (this.annotationSetting.circleFontSize / this.currentZoom);
-        var fontYDisplacement = (this.annotationSetting.circleFontYDisplacement) / this.currentZoom;
-        var fontString = fontSize + 'px ' + this.annotationSetting.circleFontFamily;
+        var circleRadius = annotationsModule.annotationSetting.circleRadius / this.currentZoom;
+        var circleBorderRadius = circleRadius + annotationsModule.annotationSetting.circleBorderRadius / this.currentZoom;
+        var fontSize = (annotationsModule.annotationSetting.circleFontSize / this.currentZoom);
+        var fontYDisplacement = (annotationsModule.annotationSetting.circleFontYDisplacement) / this.currentZoom;
+        var fontString = fontSize + 'px ' + annotationsModule.annotationSetting.circleFontFamily;
         // Draw the circle 
         var circleShape = new createjs.Shape();
         var g = circleShape.graphics;
-        g.beginFill(this.annotationSetting.circleBorderColor);
+        g.beginFill(annotationsModule.annotationSetting.circleBorderColor);
         g.drawCircle(drawing.numberLocation.x, drawing.numberLocation.y, circleBorderRadius);
         g.endFill();
-        g.beginFill(this.annotationSetting.circleColor);
+        g.beginFill(annotationsModule.annotationSetting.circleColor);
         g.drawCircle(drawing.numberLocation.x, drawing.numberLocation.y, circleRadius);
         g.endFill();
         this.annotationNumberLayer.addChild(circleShape);
         // Draw the text 
-        var numberShape = new createjs.Text(annotationNumber.toString(), fontString, this.annotationSetting.circleFontColor);
+        var numberShape = new createjs.Text(annotationNumber.toString(), fontString, annotationsModule.annotationSetting.circleFontColor);
         numberShape.x = drawing.numberLocation.x;
         numberShape.y = drawing.numberLocation.y - fontYDisplacement;
         numberShape.textAlign = 'center'
@@ -158,7 +143,7 @@ class AnnotationDisplayManager {
     }
 
     private resetDrawingCanvas() {
-        this.drawingCanvas.graphics.clear().setStrokeStyle(this.annotationSetting.lineWidth / this.currentZoom, 'round', 'round');
+        this.drawingCanvas.graphics.clear().setStrokeStyle(annotationsModule.annotationSetting.lineWidth / this.currentZoom, 'round', 'round');
     }
 
     private initialzeUnsavedAnnotations() {
@@ -173,7 +158,7 @@ class AnnotationDisplayManager {
         this.annotationNumberLayer.removeAllChildren();
 
         // Setup Start
-        this.drawingCanvas.graphics.beginStroke(this.annotationSetting.color);
+        this.drawingCanvas.graphics.beginStroke(annotationsModule.annotationSetting.color);
 
         _.forEach(this.imageModel.annotations, (annotation) => {
             _.forEach(annotation.drawings, (drawing) => {
