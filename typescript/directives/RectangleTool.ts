@@ -3,70 +3,54 @@
 
 class RectangleTool implements AnnotationTool {
 
-    constructor(public drawingCanvas: createjs.Shape) { }
+    constructor(public drawingCanvas: createjs.Shape, public context: CanvasRenderingContext2D) { }
 
     renderDrawing(drawing: AnnotationDrawing) {
-        // Draw points 
-        if (drawing.points.length == 0) return;
-
-        var oldPt = annotationsModule.pixel_to_createJSPoint(drawing.points[0]);
-        var oldMidPt = oldPt.clone();
-
-        _.forEach(drawing.points, (pixelPoint) => {
-            var newPoint = annotationsModule.pixel_to_createJSPoint(pixelPoint);
-            var midPt = new createjs.Point((oldPt.x + newPoint.x) / 2, (oldPt.y + newPoint.y) / 2);
-
-            this.drawingCanvas.graphics.moveTo(midPt.x, midPt.y).curveTo(oldPt.x, oldPt.y, oldMidPt.x, oldMidPt.y);
-
-            oldPt = newPoint.clone();
-            oldMidPt = midPt.clone();
-        });
-    }
-
-    currentPointAnnotation: AnnotationDrawing;
-    oldPt;
-    oldMidPt;
-
-    handleMouseDown(pixelx: number, pixely: number) {
-
-        this.oldPt = new createjs.Point(pixelx, pixely);
-        this.oldMidPt = this.oldPt;
-
-        this.currentPointAnnotation = {
-            type: ToolType.brush,
-            numberLocation: null,
-            points: [annotationsModule.createJSPoint_to_pixel(this.oldPt)]
-        };
+        if (!drawing.rectangle) return;
 
         this.drawingCanvas.graphics.beginStroke(annotationsModule.annotationSetting.color);
+        this.drawingCanvas.graphics.drawRect(drawing.rectangle.x, drawing.rectangle.y, drawing.rectangle.width, drawing.rectangle.height);
+        this.drawingCanvas.graphics.endStroke();
+    }
+
+    startPoint: createjs.Point;
+    endPoint: createjs.Point;
+
+    handleMouseDown(pixelx: number, pixely: number) {
+        this.startPoint = new createjs.Point(pixelx, pixely);
+        this.endPoint = null;
     }
 
     handleMouseMove(pixelx: number, pixely: number) {
 
-        var newPoint = new createjs.Point(pixelx, pixely);
-        var midPt = new createjs.Point((this.oldPt.x + newPoint.x) / 2, (this.oldPt.y + newPoint.y) / 2);
+        this.endPoint = new createjs.Point(pixelx, pixely);
 
-        this.drawingCanvas.graphics.moveTo(midPt.x, midPt.y).curveTo(this.oldPt.x, this.oldPt.y, this.oldMidPt.x, this.oldMidPt.y);
-
-
-        this.oldPt = newPoint.clone();
-
-        this.oldMidPt.x = midPt.x;
-        this.oldMidPt.y = midPt.y;
-
-        // Store 
-        var pixelpoint = annotationsModule.createJSPoint_to_pixel(this.oldPt);
-        this.currentPointAnnotation.points.push(pixelpoint);
+        this.drawingCanvas.graphics.clear();
+        this.drawingCanvas.graphics.beginStroke(annotationsModule.annotationSetting.color);
+        this.drawingCanvas.graphics.drawRect(this.startPoint.x, this.startPoint.y, this.endPoint.x - this.startPoint.x, this.endPoint.y - this.startPoint.y);
+        this.drawingCanvas.graphics.endStroke();
     }
 
     // Should return the created annotation drawing 
     handleMouseUp(): AnnotationDrawing {
-        // Calculate the number location: 
-        // Find the min x and min y: 
-        var minx: number = _.min(this.currentPointAnnotation.points, (point) => point.x).x;
-        var miny: number = _.min(this.currentPointAnnotation.points, (point) => point.y).y;
-        this.currentPointAnnotation.numberLocation = new createjs.Point(minx, miny);
+        if (!this.endPoint) {
+            return null;
+        }
 
-        return this.currentPointAnnotation;
+        // find the min of start or end point 
+        var minX = Math.min(this.startPoint.x, this.endPoint.x);
+        var maxX = Math.max(this.startPoint.x, this.endPoint.x);
+
+        var minY = Math.min(this.startPoint.y, this.endPoint.y);
+        var maxY = Math.max(this.startPoint.y, this.endPoint.y);
+
+        var currentPointAnnotation: AnnotationDrawing = {
+            type: ToolType.rectangle,
+            numberLocation: { x: minX, y: minY },
+            rectangle: { x: minX, y: minY, width: maxX - minX, height: maxY - minY }
+        };
+
+        currentPointAnnotation.numberLocation = this.startPoint.clone();
+        return currentPointAnnotation;
     }
 }

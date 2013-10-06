@@ -35,8 +35,9 @@ interface Annotation {
 
 interface AnnotationDrawing {
     type: string;
-    points?: Point[]; // valid for brushes
     numberLocation: Point; // for quicker calc. Can be determined from points
+    points?: Point[]; // valid for brushes
+    rectangle?: { x: number; y: number; width: number; height: number; }
 }
 
 interface Point {
@@ -112,7 +113,7 @@ class AnnotationDisplayManager {
 
         // Setup the tools: 
         this.brushTool = new BrushTool(this.drawingCanvas);
-        this.rectangleTool = new RectangleTool(this.drawingCanvas);
+        this.rectangleTool = new RectangleTool(this.drawingCanvas, this.canvas.getContext('2d'));
 
         // Setup the active tool:
         this.activeTool = ToolType.rectangle;
