@@ -1,9 +1,11 @@
 /// <reference path="../reference.ts" />
 
-module createjsUtils {
-
+module ToolType {
     export var brush = "brush";
     export var rectangle = "rectangle";
+}
+
+module createjsUtils {
 
     // Returns a scaled value of the point based on the image dimensions
     export function createJSPoint_to_pixel(point: createjs.Point): Point {

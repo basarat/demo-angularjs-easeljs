@@ -88,6 +88,7 @@ class AnnotationDisplayManager {
 
     // The tools
     brushTool: BrushTool;
+    activeTool: string;
 
     constructor(public canvas: HTMLCanvasElement) {
         bindProtoFunctions(this);
@@ -117,7 +118,10 @@ class AnnotationDisplayManager {
         this.queue = new createjs.LoadQueue(false); // Using false to disble XHR only for file system based demo
 
         // Setup the tools: 
-        this.brushTool = new BrushTool(this.drawingCanvas);
+        this.brushTool = new BrushTool(this.drawingCanvas, this.annotationSetting);
+
+        // Setup the active tool:
+        this.activeTool = ToolType.brush;
     }
 
 
@@ -148,7 +152,7 @@ class AnnotationDisplayManager {
         this.annotationNumberLayer.addChild(numberShape);
 
         // Draw points 
-        if (drawing.type == createjsUtils.brush) {
+        if (drawing.type == ToolType.brush) {
             this.brushTool.renderDrawing(drawing);
         }
     }
@@ -241,9 +245,6 @@ class AnnotationDisplayManager {
         ]);
     }
 
-    currentPointAnnotation: AnnotationDrawing;
-    oldPt;
-    oldMidPt;
 
     private isMouseOutsideImage() {
         return !this.image.hitTest(this.stage.mouseX / this.stage.scaleX, this.stage.mouseY / this.stage.scaleY);
@@ -255,59 +256,56 @@ class AnnotationDisplayManager {
             return;
         }
 
-        this.oldPt = new createjs.Point(this.stage.mouseX / this.stage.scaleX, this.stage.mouseY / this.stage.scaleY);
-        this.oldMidPt = this.oldPt;
+        // Convert to image pixel points
+        var pixelx = this.stage.mouseX / this.stage.scaleX;
+        var pixely = this.stage.mouseY / this.stage.scaleY;
 
+        // Setup event listeners
         this.stage.addEventListener("stagemousemove", this.handleMouseMove);
         this.stage.addEventListener("stagemouseup", this.handleMouseUp);
 
+        // Inform the correct tool
+        if (this.activeTool == ToolType.brush) {
+            this.brushTool.handleMouseDown(pixelx, pixely);
+        }
 
-        this.currentPointAnnotation = {
-            type: createjsUtils.brush,
-            numberLocation: null,
-            points: [createjsUtils.createJSPoint_to_pixel(this.oldPt)]
-        };
-
-        this.drawingCanvas.graphics.beginStroke(this.annotationSetting.color);
+        // Render it out 
+        this.stage.update();
     }
 
     handleMouseMove(event) {
-
         // If it is outside the image ignore 
         if (this.isMouseOutsideImage()) {
             return;
         }
 
-        var newPoint = new createjs.Point(this.stage.mouseX / this.stage.scaleX, this.stage.mouseY / this.stage.scaleY);
-        var midPt = new createjs.Point((this.oldPt.x + newPoint.x) / 2, (this.oldPt.y + newPoint.y) / 2);
+        // Convert to image pixel points
+        var pixelx = this.stage.mouseX / this.stage.scaleX;
+        var pixely = this.stage.mouseY / this.stage.scaleY;
 
-        this.drawingCanvas.graphics.moveTo(midPt.x, midPt.y).curveTo(this.oldPt.x, this.oldPt.y, this.oldMidPt.x, this.oldMidPt.y);
+        // Inform the correct tool
+        if (this.activeTool == ToolType.brush) {
+            this.brushTool.handleMouseMove(pixelx, pixely);
+        }
+
+        // Render it out
         this.stage.update();
-
-        this.oldPt = newPoint.clone();
-
-        this.oldMidPt.x = midPt.x;
-        this.oldMidPt.y = midPt.y;
-
-        // Store 
-        var pixelpoint = createjsUtils.createJSPoint_to_pixel(this.oldPt);
-        this.currentPointAnnotation.points.push(pixelpoint);
     }
 
     handleMouseUp(event) {
         this.stage.removeEventListener("stagemousemove", this.handleMouseMove);
         this.stage.removeEventListener("stagemouseup", this.handleMouseUp);
 
-        // Calculate the number location: 
-        // Find the min x and min y: 
-        var minx: number = _.min(this.currentPointAnnotation.points, (point) => point.x).x;
-        var miny: number = _.min(this.currentPointAnnotation.points, (point) => point.y).y;
-        this.currentPointAnnotation.numberLocation = new createjs.Point(minx, miny);
+        var currentAnnotation;
+        // Inform the correct tool
+        if (this.activeTool == ToolType.brush) {
+            currentAnnotation = this.brushTool.handleMouseUp();
+        }
 
         // Setup unsaved annotations if they are not already setup: 
         if (!this.imageModel.unsavedAnnotation) this.initialzeUnsavedAnnotations();
         // Add to the unsaved annotations 
-        this.imageModel.unsavedAnnotation.drawings.push(this.currentPointAnnotation);
+        this.imageModel.unsavedAnnotation.drawings.push(currentAnnotation);
 
         // Just redraw: 
         this.redraw();
