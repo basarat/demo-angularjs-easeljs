@@ -1,5 +1,4 @@
-video-angular-typescript-requirejs
+demo-angularjs-easeljs
 ========================
 
-Accompanying repository for a video tutorial 
-showing a smooth workflow experience with AngularJS - TypeScript - RequireJS using [grunt-ts](https://npmjs.org/package/grunt-ts)
+Demo to show how you can integrage easeljs with angularjs
