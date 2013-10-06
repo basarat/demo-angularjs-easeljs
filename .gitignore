@@ -1,7 +1,3 @@
 node_modules/
 *.map
-app/out.js
-app/*.js
-app/*/*.js
-app/*/*/*.js
 .idea/
