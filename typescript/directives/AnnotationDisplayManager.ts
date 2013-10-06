@@ -66,8 +66,8 @@ class AnnotationDisplayManager {
     image: createjs.Bitmap; // The bottom image DisplayObject
     queue: createjs.LoadQueue;
 
-    drawingCanvas: createjs.Shape; // Used for already saved / unsaved annotations
-    liveDrawingCanvas: createjs.Shape; // Used for current annotation in progress
+    drawingCanvas: createjs.Graphics; // Used for already saved / unsaved annotations
+    liveDrawingCanvas: createjs.Graphics; // Used for current annotation in progress
     drawingCanvasShadow: createjs.Shadow;
 
     annotationNumberLayer: createjs.Container;
@@ -95,14 +95,17 @@ class AnnotationDisplayManager {
         // Create a drawing canvas for annotation drawings
         this.drawingCanvasShadow = new createjs.Shadow(annotationsModule.annotationSetting.shadow, 5, 5, 15);
 
-        this.drawingCanvas = new createjs.Shape();
-        this.liveDrawingCanvas = new createjs.Shape();        
+        var drawingCanvas = new createjs.Shape();
+        var liveDrawingCanvas = new createjs.Shape();        
 
-        this.drawingCanvas.shadow = this.drawingCanvasShadow;
-        this.liveDrawingCanvas.shadow = this.drawingCanvasShadow;
+        drawingCanvas.shadow = this.drawingCanvasShadow;
+        liveDrawingCanvas.shadow = this.drawingCanvasShadow;
 
-        this.stage.addChild(this.drawingCanvas);
-        this.stage.addChild(this.liveDrawingCanvas);
+        this.stage.addChild(drawingCanvas);
+        this.stage.addChild(liveDrawingCanvas);
+
+        this.drawingCanvas = drawingCanvas.graphics;
+        this.liveDrawingCanvas = liveDrawingCanvas.graphics;
 
 
         // Create a drawing container for annotation numbers
@@ -165,12 +168,12 @@ class AnnotationDisplayManager {
     }
 
     private resetDrawingCanvas() {
-        this.drawingCanvas.graphics.clear().setStrokeStyle(annotationsModule.annotationSetting.lineWidth / this.currentZoom, 'round', 'round'); 
+        this.drawingCanvas.clear().setStrokeStyle(annotationsModule.annotationSetting.lineWidth / this.currentZoom, 'round', 'round'); 
         this.resetLiveDrawingCanvas();      
     }
 
     private resetLiveDrawingCanvas() {
-        this.liveDrawingCanvas.graphics.clear().setStrokeStyle(annotationsModule.annotationSetting.lineWidth / this.currentZoom, 'round', 'round');
+        this.liveDrawingCanvas.clear().setStrokeStyle(annotationsModule.annotationSetting.lineWidth / this.currentZoom, 'round', 'round');
     }
 
     private initialzeUnsavedAnnotations() {
@@ -185,7 +188,7 @@ class AnnotationDisplayManager {
         this.annotationNumberLayer.removeAllChildren();
 
         // Setup Start
-        this.drawingCanvas.graphics.beginStroke(annotationsModule.annotationSetting.color);
+        this.drawingCanvas.beginStroke(annotationsModule.annotationSetting.color);
 
         _.forEach(this.imageModel.annotations, (annotation) => {
             _.forEach(annotation.drawings, (drawing) => {
@@ -198,7 +201,7 @@ class AnnotationDisplayManager {
         });
 
         // Setup End
-        this.drawingCanvas.graphics.endStroke();
+        this.drawingCanvas.endStroke();
 
 
         // Render it out

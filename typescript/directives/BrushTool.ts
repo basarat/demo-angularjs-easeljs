@@ -3,7 +3,7 @@
 
 class BrushTool implements AnnotationTool {
 
-    constructor(public drawingCanvas: createjs.Shape, public liveDrawingCanvas: createjs.Shape) { }
+    constructor(public drawingCanvas: createjs.Graphics, public liveDrawingCanvas: createjs.Graphics) { }
 
     renderDrawing(drawing: AnnotationDrawing) {
         // Draw points 
@@ -16,7 +16,7 @@ class BrushTool implements AnnotationTool {
             var newPoint = annotationsModule.pixel_to_createJSPoint(pixelPoint);
             var midPt = new createjs.Point((oldPt.x + newPoint.x) / 2, (oldPt.y + newPoint.y) / 2);
 
-            this.drawingCanvas.graphics.moveTo(midPt.x, midPt.y).curveTo(oldPt.x, oldPt.y, oldMidPt.x, oldMidPt.y);
+            this.drawingCanvas.moveTo(midPt.x, midPt.y).curveTo(oldPt.x, oldPt.y, oldMidPt.x, oldMidPt.y);
 
             oldPt = newPoint.clone();
             oldMidPt = midPt.clone();
@@ -38,7 +38,7 @@ class BrushTool implements AnnotationTool {
             points: [annotationsModule.createJSPoint_to_pixel(this.oldPt)]
         };
 
-        this.liveDrawingCanvas.graphics.beginStroke(annotationsModule.annotationSetting.color);
+        this.liveDrawingCanvas.beginStroke(annotationsModule.annotationSetting.color);
     }
 
     handleMouseMove(pixelx: number, pixely: number) {
@@ -46,7 +46,7 @@ class BrushTool implements AnnotationTool {
         var newPoint = new createjs.Point(pixelx, pixely);
         var midPt = new createjs.Point((this.oldPt.x + newPoint.x) / 2, (this.oldPt.y + newPoint.y) / 2);
 
-        this.liveDrawingCanvas.graphics.moveTo(midPt.x, midPt.y).curveTo(this.oldPt.x, this.oldPt.y, this.oldMidPt.x, this.oldMidPt.y);
+        this.liveDrawingCanvas.moveTo(midPt.x, midPt.y).curveTo(this.oldPt.x, this.oldPt.y, this.oldMidPt.x, this.oldMidPt.y);
 
 
         this.oldPt = newPoint.clone();
