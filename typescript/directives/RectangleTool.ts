@@ -1,7 +1,7 @@
 /// <reference path="../reference.ts" />
 
 
-class BrushTool implements AnnotationTool {
+class RectangleTool implements AnnotationTool {
 
     constructor(public drawingCanvas: createjs.Shape) { }
 

@@ -44,6 +44,13 @@ interface Point {
     y: number;
 }
 
+interface AnnotationTool {
+    handleMouseDown(pixelx: number, pixely: number);
+    handleMouseMove(pixelx: number, pixely: number);
+    handleMouseUp(): AnnotationDrawing;
+}
+
+
 // Has the following responsibilities: 
 // - Draw the image 
 // - Draw the annotations. The annotation draw loop
@@ -56,7 +63,7 @@ class AnnotationDisplayManager {
 
     stage: createjs.Stage;
     image: createjs.Bitmap; // The bottom image DisplayObject
-    queue: createjs.LoadQueue;    
+    queue: createjs.LoadQueue;
 
     drawingCanvas: createjs.Shape;
     drawingCanvasShadow: createjs.Shadow;
@@ -73,6 +80,7 @@ class AnnotationDisplayManager {
 
     // The tools
     brushTool: BrushTool;
+    rectangleTool: RectangleTool;
     activeTool: string;
 
     constructor(public canvas: HTMLCanvasElement) {
@@ -104,9 +112,10 @@ class AnnotationDisplayManager {
 
         // Setup the tools: 
         this.brushTool = new BrushTool(this.drawingCanvas);
+        this.rectangleTool = new RectangleTool(this.drawingCanvas);
 
         // Setup the active tool:
-        this.activeTool = ToolType.brush;
+        this.activeTool = ToolType.rectangle;
     }
 
 
@@ -136,9 +145,13 @@ class AnnotationDisplayManager {
         numberShape.textAlign = 'center'
         this.annotationNumberLayer.addChild(numberShape);
 
-        // Draw points 
-        if (drawing.type == ToolType.brush) {
-            this.brushTool.renderDrawing(drawing);
+        // Call the tool to draw it out
+        switch (drawing.type) {
+            case ToolType.brush:
+                this.brushTool.renderDrawing(drawing);
+                break;
+            case ToolType.rectangle:
+                this.rectangleTool.renderDrawing(drawing);
         }
     }
 
@@ -250,8 +263,13 @@ class AnnotationDisplayManager {
         this.stage.addEventListener("stagemouseup", this.handleMouseUp);
 
         // Inform the correct tool
-        if (this.activeTool == ToolType.brush) {
-            this.brushTool.handleMouseDown(pixelx, pixely);
+        switch (this.activeTool) {
+            case ToolType.brush:
+                this.brushTool.handleMouseDown(pixelx, pixely);
+                break;
+            case ToolType.rectangle:
+                this.rectangleTool.handleMouseDown(pixelx, pixely);
+                break;
         }
 
         // Render it out 
@@ -269,8 +287,13 @@ class AnnotationDisplayManager {
         var pixely = this.stage.mouseY / this.stage.scaleY;
 
         // Inform the correct tool
-        if (this.activeTool == ToolType.brush) {
-            this.brushTool.handleMouseMove(pixelx, pixely);
+        switch (this.activeTool) {
+            case ToolType.brush:
+                this.brushTool.handleMouseMove(pixelx, pixely);
+                break;
+            case ToolType.rectangle:
+                this.rectangleTool.handleMouseMove(pixelx, pixely);
+                break;
         }
 
         // Render it out
@@ -281,16 +304,26 @@ class AnnotationDisplayManager {
         this.stage.removeEventListener("stagemousemove", this.handleMouseMove);
         this.stage.removeEventListener("stagemouseup", this.handleMouseUp);
 
+        // Will be returned by the tool 
         var currentAnnotation;
+
         // Inform the correct tool
-        if (this.activeTool == ToolType.brush) {
-            currentAnnotation = this.brushTool.handleMouseUp();
+        switch (this.activeTool) {
+            case ToolType.brush:
+                currentAnnotation = this.brushTool.handleMouseUp();
+                break;
+            case ToolType.rectangle:
+                currentAnnotation = this.rectangleTool.handleMouseUp();
+                break;
         }
 
-        // Setup unsaved annotations if they are not already setup: 
-        if (!this.imageModel.unsavedAnnotation) this.initialzeUnsavedAnnotations();
-        // Add to the unsaved annotations 
-        this.imageModel.unsavedAnnotation.drawings.push(currentAnnotation);
+        // If a new annotation was returned
+        if (currentAnnotation) {
+            // Setup unsaved annotations if they are not already setup: 
+            if (!this.imageModel.unsavedAnnotation) this.initialzeUnsavedAnnotations();
+            // Add to the unsaved annotations 
+            this.imageModel.unsavedAnnotation.drawings.push(currentAnnotation);
+        }
 
         // Just redraw: 
         this.redraw();
