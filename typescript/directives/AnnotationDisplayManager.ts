@@ -66,7 +66,8 @@ class AnnotationDisplayManager {
     image: createjs.Bitmap; // The bottom image DisplayObject
     queue: createjs.LoadQueue;
 
-    drawingCanvas: createjs.Shape;
+    drawingCanvas: createjs.Shape; // Used for already saved / unsaved annotations
+    liveDrawingCanvas: createjs.Shape; // Used for current annotation in progress
     drawingCanvasShadow: createjs.Shadow;
 
     annotationNumberLayer: createjs.Container;
@@ -92,10 +93,17 @@ class AnnotationDisplayManager {
         createjs.Touch.enable(this.stage);
 
         // Create a drawing canvas for annotation drawings
-        this.drawingCanvas = new createjs.Shape();
         this.drawingCanvasShadow = new createjs.Shadow(annotationsModule.annotationSetting.shadow, 5, 5, 15);
+
+        this.drawingCanvas = new createjs.Shape();
+        this.liveDrawingCanvas = new createjs.Shape();        
+
         this.drawingCanvas.shadow = this.drawingCanvasShadow;
+        this.liveDrawingCanvas.shadow = this.drawingCanvasShadow;
+
         this.stage.addChild(this.drawingCanvas);
+        this.stage.addChild(this.liveDrawingCanvas);
+
 
         // Create a drawing container for annotation numbers
         this.annotationNumberLayer = new createjs.Container();
@@ -112,8 +120,8 @@ class AnnotationDisplayManager {
         this.queue = new createjs.LoadQueue(false); // Using false to disble XHR only for file system based demo
 
         // Setup the tools: 
-        this.brushTool = new BrushTool(this.drawingCanvas);
-        this.rectangleTool = new RectangleTool(this.drawingCanvas, this.canvas.getContext('2d'));
+        this.brushTool = new BrushTool(this.drawingCanvas,this.liveDrawingCanvas);
+        this.rectangleTool = new RectangleTool(this.drawingCanvas, this.liveDrawingCanvas);
 
         // Setup the active tool:
         this.activeTool = ToolType.rectangle;
@@ -157,7 +165,12 @@ class AnnotationDisplayManager {
     }
 
     private resetDrawingCanvas() {
-        this.drawingCanvas.graphics.clear().setStrokeStyle(annotationsModule.annotationSetting.lineWidth / this.currentZoom, 'round', 'round');
+        this.drawingCanvas.graphics.clear().setStrokeStyle(annotationsModule.annotationSetting.lineWidth / this.currentZoom, 'round', 'round'); 
+        this.resetLiveDrawingCanvas();      
+    }
+
+    private resetLiveDrawingCanvas() {
+        this.liveDrawingCanvas.graphics.clear().setStrokeStyle(annotationsModule.annotationSetting.lineWidth / this.currentZoom, 'round', 'round');
     }
 
     private initialzeUnsavedAnnotations() {
@@ -286,16 +299,18 @@ class AnnotationDisplayManager {
         // Convert to image pixel points
         var pixelx = this.stage.mouseX / this.stage.scaleX;
         var pixely = this.stage.mouseY / this.stage.scaleY;
-
+                
         // Inform the correct tool
         switch (this.activeTool) {
             case ToolType.brush:
                 this.brushTool.handleMouseMove(pixelx, pixely);
                 break;
             case ToolType.rectangle:
+                // As rect requires the liveCanvas to be refreshed we do that here: 
+                this.resetLiveDrawingCanvas();
                 this.rectangleTool.handleMouseMove(pixelx, pixely);
                 break;
-        }
+        }        
 
         // Render it out
         this.stage.update();
