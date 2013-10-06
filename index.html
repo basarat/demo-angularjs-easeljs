@@ -28,8 +28,8 @@
 <body ng-controller="MainController">
     <br />
     <div class="row row-fluid">
-        <button type="button" class="btn btn-large span1 offset1" ng-click="vm.settool('brush')">Brush</button>
-        <button type="button" class="btn btn-large span1" ng-click="vm.settool('rectangle')">Rectangle</button>
+        <button type="button" class="btn btn-large span1 offset1" ng-click="vm.settool('brush')" ng-class="{'btn-inverse': vm.tool=='brush'}">Brush</button>
+        <button type="button" class="btn btn-large span1" ng-click="vm.settool('rectangle')" ng-class="{'btn-inverse': vm.tool=='rectangle'}">Rectangle</button>
         <button type="button" class="btn btn-large btn-success span1" ng-click="vm.save()">Save</button>
         <button type="button" class="btn btn-large span2 offset1" ng-click="vm.save();vm.currentImage=vm.image1">First Image</button>
         <button type="button" class="btn btn-large span2" ng-click="vm.save();vm.currentImage=vm.image2">Second Image</button>
