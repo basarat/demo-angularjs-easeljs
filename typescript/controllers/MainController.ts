@@ -19,6 +19,8 @@ module Controllers {
             annotations: []
         }
 
+        tool = 'brush';
+
         constructor($scope) {
             $scope.vm = this;
             this.currentImage = this.image1;
@@ -36,7 +38,8 @@ module Controllers {
             }
         }
 
-        clear() {
+        settool(tool) {
+            this.tool = tool;
         }
     }
 }

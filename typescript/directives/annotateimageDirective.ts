@@ -6,6 +6,7 @@ interface AnnotateImageDirectiveScope extends ng.IScope {
     image: UIAnnotateImage;
     width: number;
     height: number;
+    tool: string;
 }
 
 myApp.directives.directive('annotateimage', ['$isolator', function ($isolator: $isolatorService): ng.IDirective {
@@ -17,6 +18,7 @@ myApp.directives.directive('annotateimage', ['$isolator', function ($isolator: $
                     image: '=',
                     width: '=',
                     height: '=',
+                    tool:'=',
                 }, scope, element, attrs, annotateimage.html);
 
             // Find the canvas
@@ -28,6 +30,11 @@ myApp.directives.directive('annotateimage', ['$isolator', function ($isolator: $
             scope.$watch('image', () => {
                 manager.setImageModel(scope.image);
             });
+
+            // Watch the tool
+            scope.$watch('tool', () => {
+                manager.setTool(scope.tool);
+            });            
             
             // Watch the size 
             scope.$watch('width', () => { manager.resize(scope.width,scope.height) });

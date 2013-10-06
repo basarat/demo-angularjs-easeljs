@@ -96,7 +96,7 @@ class AnnotationDisplayManager {
         this.drawingCanvasShadow = new createjs.Shadow(annotationsModule.annotationSetting.shadow, 5, 5, 15);
 
         var drawingCanvas = new createjs.Shape();
-        var liveDrawingCanvas = new createjs.Shape();        
+        var liveDrawingCanvas = new createjs.Shape();
 
         drawingCanvas.shadow = this.drawingCanvasShadow;
         liveDrawingCanvas.shadow = this.drawingCanvasShadow;
@@ -123,11 +123,11 @@ class AnnotationDisplayManager {
         this.queue = new createjs.LoadQueue(false); // Using false to disble XHR only for file system based demo
 
         // Setup the tools: 
-        this.brushTool = new BrushTool(this.drawingCanvas,this.liveDrawingCanvas);
+        this.brushTool = new BrushTool(this.drawingCanvas, this.liveDrawingCanvas);
         this.rectangleTool = new RectangleTool(this.drawingCanvas, this.liveDrawingCanvas);
 
-        // Setup the active tool:
-        this.activeTool = ToolType.rectangle;
+        // Setup the default tool:
+        this.setTool(ToolType.brush);
     }
 
     private renderAnnotationNumber(annotationNumber: number, drawing: AnnotationDrawing) {
@@ -171,8 +171,8 @@ class AnnotationDisplayManager {
     }
 
     private resetDrawingCanvas() {
-        this.drawingCanvas.clear().setStrokeStyle(annotationsModule.annotationSetting.lineWidth / this.currentZoom, 'round', 'round'); 
-        this.resetLiveDrawingCanvas();      
+        this.drawingCanvas.clear().setStrokeStyle(annotationsModule.annotationSetting.lineWidth / this.currentZoom, 'round', 'round');
+        this.resetLiveDrawingCanvas();
     }
 
     private resetLiveDrawingCanvas() {
@@ -187,8 +187,8 @@ class AnnotationDisplayManager {
         if (!this.imageModel) return;
 
         // Clear
-        this.resetDrawingCanvas();
-        this.annotationNumberLayer.removeAllChildren();
+        this.resetDrawingCanvas(); // The canvas 
+        this.annotationNumberLayer.removeAllChildren(); // The number layer
 
         // Setup Start
         this.drawingCanvas.beginStroke(annotationsModule.annotationSetting.color);
@@ -205,7 +205,6 @@ class AnnotationDisplayManager {
 
         // Setup End
         this.drawingCanvas.endStroke();
-
 
         // Render it out
         this.stage.update();
@@ -263,6 +262,9 @@ class AnnotationDisplayManager {
         ]);
     }
 
+    setTool(tool: string) {
+        this.activeTool = tool;
+    }
 
     private isMouseOutsideImage() {
         return !this.image.hitTest(this.stage.mouseX / this.stage.scaleX, this.stage.mouseY / this.stage.scaleY);
@@ -305,7 +307,7 @@ class AnnotationDisplayManager {
         // Convert to image pixel points
         var pixelx = this.stage.mouseX / this.stage.scaleX;
         var pixely = this.stage.mouseY / this.stage.scaleY;
-                
+
         // Inform the correct tool
         switch (this.activeTool) {
             case ToolType.brush:
@@ -316,7 +318,7 @@ class AnnotationDisplayManager {
                 this.resetLiveDrawingCanvas();
                 this.rectangleTool.handleMouseMove(pixelx, pixely);
                 break;
-        }        
+        }
 
         // Render it out
         this.stage.update();
