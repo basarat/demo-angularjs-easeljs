@@ -130,9 +130,7 @@ class AnnotationDisplayManager {
         this.activeTool = ToolType.rectangle;
     }
 
-
-
-    private renderDrawing(annotationNumber: number, drawing: AnnotationDrawing) {
+    private renderAnnotationNumber(annotationNumber: number, drawing: AnnotationDrawing) {
         // Draw the number         
         // Scale the values
         var circleRadius = annotationsModule.annotationSetting.circleRadius / this.currentZoom;
@@ -156,6 +154,11 @@ class AnnotationDisplayManager {
         numberShape.y = drawing.numberLocation.y - fontYDisplacement;
         numberShape.textAlign = 'center'
         this.annotationNumberLayer.addChild(numberShape);
+    }
+
+    private renderDrawing(annotationNumber: number, drawing: AnnotationDrawing) {
+        // Draw the number
+        this.renderAnnotationNumber(annotationNumber, drawing);
 
         // Call the tool to draw it out
         switch (drawing.type) {
