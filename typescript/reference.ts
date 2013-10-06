@@ -1,5 +1,7 @@
 /// <reference path="angularModules.ts" />
 
+/// <reference path="directives/createjsUtils.ts" />
+/// <reference path="directives/BrushTool.ts" />
 /// <reference path="directives/AnnotationDisplayManager.ts" />
 
 //grunt-start

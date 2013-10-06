@@ -34,7 +34,7 @@ interface Annotation {
 }
 
 interface AnnotationDrawing {
-    //type: string;
+    type: string;
     points?: Point[]; // valid for brushes
     numberLocation: Point; // for quicker calc. Can be determined from points
 }
@@ -86,6 +86,9 @@ class AnnotationDisplayManager {
     minZoom: number; // The minimum zoom level we will allow for the internal createjs canvas
     currentZoom: number; // The current zoom level
 
+    // The tools
+    brushTool: BrushTool;
+
     constructor(public canvas: HTMLCanvasElement) {
         bindProtoFunctions(this);
 
@@ -112,23 +115,12 @@ class AnnotationDisplayManager {
 
         // Setup the load queue
         this.queue = new createjs.LoadQueue(false); // Using false to disble XHR only for file system based demo
+
+        // Setup the tools: 
+        this.brushTool = new BrushTool(this.drawingCanvas);
     }
 
-    // Returns a scaled value of the point based on the image dimensions
-    private createJSPoint_to_pixel(point: createjs.Point): Point {
-        var x = (point.x);
-        var y = (point.y);
-        return {
-            x: x,
-            y: y
-        };
-    }
 
-    private pixel_to_createJSPoint(point: Point): createjs.Point {
-        var x = (point.x);
-        var y = (point.y);
-        return new createjs.Point(x, y);
-    }
 
     private renderDrawing(annotationNumber: number, drawing: AnnotationDrawing) {
         // Draw the number         
@@ -156,21 +148,9 @@ class AnnotationDisplayManager {
         this.annotationNumberLayer.addChild(numberShape);
 
         // Draw points 
-        if (drawing.points.length == 0) return;
-
-        var oldPt = this.pixel_to_createJSPoint(drawing.points[0]);
-        var oldMidPt = oldPt.clone();
-
-        _.forEach(drawing.points, (pixelPoint) => {
-            var newPoint = this.pixel_to_createJSPoint(pixelPoint);
-            var midPt = new createjs.Point((oldPt.x + newPoint.x) / 2, (oldPt.y + newPoint.y) / 2);
-
-            this.drawingCanvas.graphics.moveTo(midPt.x, midPt.y).curveTo(oldPt.x, oldPt.y, oldMidPt.x, oldMidPt.y);
-
-            oldPt = newPoint.clone();
-            oldMidPt = midPt.clone();
-        });
-
+        if (drawing.type == createjsUtils.brush) {
+            this.brushTool.renderDrawing(drawing);
+        }
     }
 
     private resetDrawingCanvas() {
@@ -283,8 +263,9 @@ class AnnotationDisplayManager {
 
 
         this.currentPointAnnotation = {
+            type: createjsUtils.brush,
             numberLocation: null,
-            points: [this.createJSPoint_to_pixel(this.oldPt)]
+            points: [createjsUtils.createJSPoint_to_pixel(this.oldPt)]
         };
 
         this.drawingCanvas.graphics.beginStroke(this.annotationSetting.color);
@@ -309,7 +290,7 @@ class AnnotationDisplayManager {
         this.oldMidPt.y = midPt.y;
 
         // Store 
-        var pixelpoint = this.createJSPoint_to_pixel(this.oldPt);        
+        var pixelpoint = createjsUtils.createJSPoint_to_pixel(this.oldPt);
         this.currentPointAnnotation.points.push(pixelpoint);
     }
 
