@@ -409,9 +409,9 @@ var Controllers;
     var MainController = (function () {
         function MainController($scope) {
             this.image1 = {
-                uri: './images/550x190.png',
-                width: 550,
-                height: 190,
+                uri: './images/landscape.jpg',
+                width: 1920,
+                height: 1200,
                 annotations: []
             };
             this.image2 = {

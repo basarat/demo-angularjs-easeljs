@@ -6,9 +6,9 @@ module Controllers {
         currentImage: UIAnnotateImage;
 
         image1: UIAnnotateImage = {
-            uri: './images/550x190.png',
-            width: 550,
-            height: 190,
+            uri: './images/landscape.jpg',
+            width: 1920,
+            height: 1200,
             annotations: []
         }
 
